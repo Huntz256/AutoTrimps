@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         AutoTrimps
-// @namespace    https://github.com/zininzinin/AutoTrimps
+// @namespace    https://github.com/Huntz256/AutoTrimps
 // @version      2.1
 // @description  Automate all the trimps!
 // @author       zininzinin, spindrjr, Ishkaru
@@ -8,4 +8,4 @@
 // @include        *kongregate.com/games/GreenSatellite/trimps
 // @grant        none
 // ==/UserScript==
-javascript: with(document)(head.appendChild(createElement('script')).src = 'https://zininzinin.github.io/AutoTrimps/AutoTrimps2.js')._;
+javascript: with(document)(head.appendChild(createElement('script')).src = 'https://Huntz256.github.io/AutoTrimps/AutoTrimps2.js')._;
