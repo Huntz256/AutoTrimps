@@ -7,8 +7,6 @@
 // @include      *trimps.github.io*
 // @grant        none
 // ==/UserScript==
-
-
 ////////////////////////////////////////
 //Variables/////////////////////////////
 ////////////////////////////////////////
@@ -130,18 +128,18 @@ var housingList = ['Hut', 'House', 'Mansion', 'Hotel', 'Resort', 'Gateway', 'Col
 ////////////////////////////////////////
 //polyfill for includes function
 if (!String.prototype.includes) {
-  String.prototype.includes = function(search, start) {
-    'use strict';
-    if (typeof start !== 'number') {
-      start = 0;
-    }
+    String.prototype.includes = function(search, start) {
+        'use strict';
+        if (typeof start !== 'number') {
+            start = 0;
+        }
 
-    if (start + search.length > this.length) {
-      return false;
-    } else {
-      return this.indexOf(search, start) !== -1;
-    }
-  };
+        if (start + search.length > this.length) {
+            return false;
+        } else {
+            return this.indexOf(search, start) !== -1;
+        }
+    };
 }
 
 //Loads the automation settings from browser cache
@@ -197,22 +195,22 @@ function timeStamp() {
 
 function getPerSecBeforeManual(job) {
     var perSec = 0;
-    if (game.jobs[job].owned > 0){
+    if (game.jobs[job].owned > 0) {
         perSec = (game.jobs[job].owned * game.jobs[job].modifier);
         if (game.portal.Motivation.level > 0) perSec += (perSec * game.portal.Motivation.level * game.portal.Motivation.modifier);
         if (game.portal.Motivation_II.level > 0) perSec *= (1 + (game.portal.Motivation_II.level * game.portal.Motivation_II.modifier));
         if (game.portal.Meditation.level > 0) perSec *= (1 + (game.portal.Meditation.getBonusPercent() * 0.01)).toFixed(2);
         if (game.global.challengeActive == "Meditate") perSec *= 1.25;
         else if (game.global.challengeActive == "Size") perSec *= 1.5;
-        if (game.global.challengeActive == "Toxicity"){
+        if (game.global.challengeActive == "Toxicity") {
             var toxMult = (game.challenges.Toxicity.lootMult * game.challenges.Toxicity.stacks) / 100;
             perSec *= (1 + toxMult);
         }
-        if (game.global.challengeActive == "Balance"){
+        if (game.global.challengeActive == "Balance") {
             perSec *= game.challenges.Balance.getGatherMult();
         }
         if (game.global.challengeActive == "Watch") perSec /= 2;
-        if (game.global.challengeActive == "Lead" && ((game.global.world % 2) == 1)) perSec*= 2;
+        if (game.global.challengeActive == "Lead" && ((game.global.world % 2) == 1)) perSec *= 2;
         perSec = calcHeirloomBonus("Staff", job + "Speed", perSec);
     }
     return perSec
@@ -248,7 +246,7 @@ function safeBuyBuilding(building) {
     game.global.firing = false;
     //avoid slow building from clamping
     //buy as many warpstations as we can afford
-    if(building == 'Warpstation'){
+    if (building == 'Warpstation') {
         game.global.buyAmt = 'Max';
         game.global.maxSplit = 1;
         buyBuilding(building, true, true);
@@ -280,7 +278,7 @@ function highlightHousing() {
             cost += getBuildingItemPrice(building, "gems", false, 1);
             var ratio = cost / building.increase.by;
             //don't consider Gateway if we can't afford it right now - hopefully to prevent game waiting for fragments to buy gateway when collector could be bought right now
-            if(unlockedHousing[house] == "Gateway" && !canAffordBuilding('Gateway')) continue;
+            if (unlockedHousing[house] == "Gateway" && !canAffordBuilding('Gateway')) continue;
             obj[unlockedHousing[house]] = ratio;
             if (document.getElementById(unlockedHousing[house]).style.border = "1px solid #00CC00") {
                 document.getElementById(unlockedHousing[house]).style.border = "1px solid #FFFFFF";
@@ -307,7 +305,7 @@ function highlightHousing() {
     } else {
         bestBuilding = null;
     }
-game.global.buyAmt = oldBuy;
+    game.global.buyAmt = oldBuy;
 }
 
 function buyFoodEfficientHousing() {
@@ -332,7 +330,7 @@ function safeBuyJob(jobTitle, amount) {
         game.global.firing = true;
         amount = Math.abs(amount);
     } else {
-            game.global.firing = false;
+        game.global.firing = false;
         if (!canAffordJob(jobTitle, false)) {
             postBuy();
             return false;
@@ -354,60 +352,65 @@ function getScienceCostToUpgrade(upgrade) {
     }
 }
 
-var worth = {'Shield': {}, 'Staff': {}};
-function sortHeirlooms(){
-    worth = {'Shield': {}, 'Staff': {}};
+var worth = {
+    'Shield': {},
+    'Staff': {}
+};
+
+function sortHeirlooms() {
+    worth = {
+        'Shield': {},
+        'Staff': {}
+    };
     for (var loom in game.global.heirloomsExtra) {
         var theLoom = game.global.heirloomsExtra[loom];
         worth[theLoom.type][loom] = theLoom.rarity;
     }
 
     //sort high to low value, priority on rarity, followed by mod evaluation
-    for (var x in worth){
+    for (var x in worth) {
         worth[x] = Object.keys(worth[x]).sort(function(a, b) {
-                if(worth[x][b] == worth[x][a]) {
-                    return evaluateMods(b, 'heirloomsExtra') - evaluateMods(a, 'heirloomsExtra');
-                }
-                else
-                    return worth[x][b] - worth[x][a];
-            });
+            if (worth[x][b] == worth[x][a]) {
+                return evaluateMods(b, 'heirloomsExtra') - evaluateMods(a, 'heirloomsExtra');
+            } else
+                return worth[x][b] - worth[x][a];
+        });
     }
-      // console.log(worth);
-       //console.log('hat: ' + worth['Shield']);
-       //console.log('staff: ' + worth['Staff']);
+    // console.log(worth);
+    //console.log('hat: ' + worth['Shield']);
+    //console.log('staff: ' + worth['Staff']);
 }
 
 
 
 function autoHeirlooms() {
     var bestUpgrade;
-    if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
-           sortHeirlooms();
-           for(var carried in game.global.heirloomsCarried) {
-                   var theLoom = game.global.heirloomsCarried[carried];
-                   if(worth[theLoom.type].length == 0) continue;
-                   var index = worth[theLoom.type][0];
-                   if(theLoom.rarity < game.global.heirloomsExtra[index].rarity || (theLoom.rarity == game.global.heirloomsExtra[index].rarity && evaluateMods(carried, 'heirloomsCarried') < evaluateMods(index, 'heirloomsExtra'))) {
-                       selectHeirloom(carried, 'heirloomsCarried');
-                       stopCarryHeirloom();
-                       selectHeirloom(index, 'heirloomsExtra');
-                       carryHeirloom();
-                       sortHeirlooms();
-                   }
-           }
-           if(game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) {
-               if(worth.Shield.length > 0)
-                   selectHeirloom(worth.Shield[0], 'heirloomsExtra');
-               else if(worth.Staff.length > 0)
-                   selectHeirloom(worth.Staff[0], 'heirloomsExtra');
-           carryHeirloom();
-           }
-    }
-    else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
-        if(game.global.selectedHeirloom[1].includes('Equipped')) {
+    if (!heirloomsShown && game.global.heirloomsExtra.length > 0) {
+        sortHeirlooms();
+        for (var carried in game.global.heirloomsCarried) {
+            var theLoom = game.global.heirloomsCarried[carried];
+            if (worth[theLoom.type].length == 0) continue;
+            var index = worth[theLoom.type][0];
+            if (theLoom.rarity < game.global.heirloomsExtra[index].rarity || (theLoom.rarity == game.global.heirloomsExtra[index].rarity && evaluateMods(carried, 'heirloomsCarried') < evaluateMods(index, 'heirloomsExtra'))) {
+                selectHeirloom(carried, 'heirloomsCarried');
+                stopCarryHeirloom();
+                selectHeirloom(index, 'heirloomsExtra');
+                carryHeirloom();
+                sortHeirlooms();
+            }
+        }
+        if (game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) {
+            if (worth.Shield.length > 0)
+                selectHeirloom(worth.Shield[0], 'heirloomsExtra');
+            else if (worth.Staff.length > 0)
+                selectHeirloom(worth.Staff[0], 'heirloomsExtra');
+            carryHeirloom();
+        }
+    } else if (heirloomsShown && game.global.selectedHeirloom.length > 0) {
+        if (game.global.selectedHeirloom[1].includes('Equipped')) {
             var loom = game.global[game.global.selectedHeirloom[1]];
             bestUpgrade = evaluateMods(0, game.global.selectedHeirloom[1], true);
-            if(bestUpgrade.index) {
+            if (bestUpgrade.index) {
                 bestUpgrade.effect *= getModUpgradeCost(loom, bestUpgrade.index);
                 bestUpgrade.effect = bestUpgrade.effect.toFixed(6);
                 var styleIndex = 4 + (bestUpgrade.index * 3);
@@ -421,12 +424,12 @@ function autoHeirlooms() {
             }
         }
     }
-       //heirloomsShown
-       //getModReplaceCost(heirloomObj, modIndex)
-       //getModUpgradeCost(heirloomObj, modIndex)
-       //document.getElementById('extraHeirloomsHere').childNodes[INDEX].childNodes[1].style.border = "1px solid #00CC00"
-       //document.getElementById('selectedHeirloom').childNodes[0].childNodes[4/7/10/13].style.backgroundColor
-       //advBtn.setAttribute("onmouseover", 'tooltip(\"Advanced Settings\", \"customText\", event, \"Leave off unless you know what you\'re doing with them.\")');
+    //heirloomsShown
+    //getModReplaceCost(heirloomObj, modIndex)
+    //getModUpgradeCost(heirloomObj, modIndex)
+    //document.getElementById('extraHeirloomsHere').childNodes[INDEX].childNodes[1].style.border = "1px solid #00CC00"
+    //document.getElementById('selectedHeirloom').childNodes[0].childNodes[4/7/10/13].style.backgroundColor
+    //advBtn.setAttribute("onmouseover", 'tooltip(\"Advanced Settings\", \"customText\", event, \"Leave off unless you know what you\'re doing with them.\")');
 }
 
 function evaluateMods(loom, location, upgrade) {
@@ -438,23 +441,23 @@ function evaluateMods(loom, location, upgrade) {
     };
     var tempEff;
     var steps;
-    if(location.includes('Equipped'))
+    if (location.includes('Equipped'))
         loom = game.global[location];
     else
         loom = game.global[location][loom];
-//    return loom.rarity;
+    //    return loom.rarity;
     var eff = 0;
-    for(var m in loom.mods) {
-        switch(loom.mods[m][0]) {
+    for (var m in loom.mods) {
+        switch (loom.mods[m][0]) {
             case 'critChance':
-                tempEff = ((loom.mods[m][1]/100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100))/((getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                tempEff = ((loom.mods[m][1] / 100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus / 100)) / ((getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus / 100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100));
                 eff += tempEff;
-                if(upgrade){
-                    if(loom.mods[m][1] >= 30) break;
+                if (upgrade) {
+                    if (loom.mods[m][1] >= 30) break;
                     steps = game.heirlooms.Shield.critChance.steps[loom.rarity];
-                    tempEff = (steps[2]/100 * getPlayerCritDamageMult())/((getPlayerCritChance() * getPlayerCritDamageMult()) + 1 - getPlayerCritChance());
+                    tempEff = (steps[2] / 100 * getPlayerCritDamageMult()) / ((getPlayerCritChance() * getPlayerCritDamageMult()) + 1 - getPlayerCritChance());
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'critChance';
                         bestUpgrade.index = m;
@@ -462,13 +465,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'critDamage':
-                tempEff = ((loom.mods[m][1]/100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100))/((getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                tempEff = ((loom.mods[m][1] / 100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100)) / ((getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus / 100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100));
                 eff += tempEff;
-                if(upgrade){
+                if (upgrade) {
                     steps = game.heirlooms.Shield.critDamage.steps[loom.rarity];
-                    tempEff = (getPlayerCritChance() * (steps[2]/100))/((getPlayerCritDamageMult() * getPlayerCritChance()) + 1 - getPlayerCritChance());
+                    tempEff = (getPlayerCritChance() * (steps[2] / 100)) / ((getPlayerCritDamageMult() * getPlayerCritChance()) + 1 - getPlayerCritChance());
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'critDamage';
                         bestUpgrade.index = m;
@@ -476,13 +479,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'trimpAttack':
-                tempEff = loom.mods[m][1]/100;
+                tempEff = loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade){
+                if (upgrade) {
                     steps = game.heirlooms.Shield.trimpAttack.steps[loom.rarity];
-                    tempEff = (steps[2]/100)/((game.heirlooms.Shield.trimpAttack.currentBonus/100) + 1);
+                    tempEff = (steps[2] / 100) / ((game.heirlooms.Shield.trimpAttack.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'trimpAttack';
                         bestUpgrade.index = m;
@@ -490,13 +493,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'voidMaps':
-                tempEff = loom.mods[m][1]/100;
+                tempEff = loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade){
+                if (upgrade) {
                     steps = game.heirlooms.Shield.voidMaps.steps[loom.rarity];
-                    tempEff = (steps[2]/100)/((game.heirlooms.Shield.voidMaps.currentBonus/100) + 1);
+                    tempEff = (steps[2] / 100) / ((game.heirlooms.Shield.voidMaps.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'voidMaps';
                         bestUpgrade.index = m;
@@ -504,13 +507,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'MinerSpeed':
-                tempEff = 0.75*loom.mods[m][1]/100;
+                tempEff = 0.75 * loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade) {
+                if (upgrade) {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    tempEff = (0.75*steps[2]/100)/((game.heirlooms.Staff.MinerSpeed.currentBonus/100) + 1);
+                    tempEff = (0.75 * steps[2] / 100) / ((game.heirlooms.Staff.MinerSpeed.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'MinerSpeed';
                         bestUpgrade.index = m;
@@ -518,13 +521,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'metalDrop':
-                tempEff = 0.75*loom.mods[m][1]/100;
+                tempEff = 0.75 * loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade) {
+                if (upgrade) {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    tempEff = (0.75*steps[2]/100)/((game.heirlooms.Staff.metalDrop.currentBonus/100) + 1);
+                    tempEff = (0.75 * steps[2] / 100) / ((game.heirlooms.Staff.metalDrop.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'metalDrop';
                         bestUpgrade.index = m;
@@ -532,13 +535,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'gemsDrop':
-                tempEff = 0.75*loom.mods[m][1]/100;
+                tempEff = 0.75 * loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade) {
+                if (upgrade) {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    tempEff = (0.75*steps[2]/100)/((game.heirlooms.Staff.gemsDrop.currentBonus/100) + 1);
+                    tempEff = (0.75 * steps[2] / 100) / ((game.heirlooms.Staff.gemsDrop.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'gemsDrop';
                         bestUpgrade.index = m;
@@ -546,13 +549,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'FarmerSpeed':
-                tempEff = 0.5*loom.mods[m][1]/100;
+                tempEff = 0.5 * loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade) {
+                if (upgrade) {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    tempEff = (0.5*steps[2]/100)/((game.heirlooms.Staff.FarmerSpeed.currentBonus/100) + 1);
+                    tempEff = (0.5 * steps[2] / 100) / ((game.heirlooms.Staff.FarmerSpeed.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'FarmerSpeed';
                         bestUpgrade.index = m;
@@ -560,13 +563,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'LumberjackSpeed':
-                tempEff = 0.5*loom.mods[m][1]/100;
+                tempEff = 0.5 * loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade) {
+                if (upgrade) {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    tempEff = (0.5*steps[2]/100)/((game.heirlooms.Staff.LumberjackSpeed.currentBonus/100) + 1);
+                    tempEff = (0.5 * steps[2] / 100) / ((game.heirlooms.Staff.LumberjackSpeed.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'LumberjackSpeed';
                         bestUpgrade.index = m;
@@ -574,13 +577,13 @@ function evaluateMods(loom, location, upgrade) {
                 }
                 break;
             case 'DragimpSpeed':
-                tempEff = 0.75*loom.mods[m][1]/100;
+                tempEff = 0.75 * loom.mods[m][1] / 100;
                 eff += tempEff;
-                if(upgrade) {
+                if (upgrade) {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    tempEff = (0.5*steps[2]/100)/((game.heirlooms.Staff.DragimpSpeed.currentBonus/100) + 1);
+                    tempEff = (0.5 * steps[2] / 100) / ((game.heirlooms.Staff.DragimpSpeed.currentBonus / 100) + 1);
                     tempEff = tempEff / getModUpgradeCost(loom, m);
-                    if(tempEff > bestUpgrade.effect) {
+                    if (tempEff > bestUpgrade.effect) {
                         bestUpgrade.effect = tempEff;
                         bestUpgrade.name = 'DragimpSpeed';
                         bestUpgrade.index = m;
@@ -590,55 +593,51 @@ function evaluateMods(loom, location, upgrade) {
             case 'empty':
                 var av;
                 //some other function?
-                if(upgrade) break;
+                if (upgrade) break;
                 //value empty mod as the average of the best mod it doesn't have. If it has all good mods, empty slot has no value
-                if(loom.type == 'Shield') {
-                    if(!checkForMod('trimpAttack', index, location)){
+                if (loom.type == 'Shield') {
+                    if (!checkForMod('trimpAttack', index, location)) {
                         steps = game.heirlooms.Shield.trimpAttack.steps[loom.rarity];
-                        av = steps[0] + ((steps[1] - steps[0])/2);
-                        tempEff = av/100;
+                        av = steps[0] + ((steps[1] - steps[0]) / 2);
+                        tempEff = av / 100;
                         eff += tempEff;
-                    }
-                    else if(!checkForMod('voidMaps', index, location)){
+                    } else if (!checkForMod('voidMaps', index, location)) {
                         steps = game.heirlooms.Shield.voidMaps.steps[loom.rarity];
-                        av = steps[0] + ((steps[1] - steps[0])/2);
-                        tempEff = (steps[2]/100);
+                        av = steps[0] + ((steps[1] - steps[0]) / 2);
+                        tempEff = (steps[2] / 100);
                         eff += tempEff;
-                    }
-                    else if(!checkForMod('critChance', index, location)){
+                    } else if (!checkForMod('critChance', index, location)) {
                         steps = game.heirlooms.Shield.critChance.steps[loom.rarity];
-                        av = steps[0] + ((steps[1] - steps[0])/2);
-                        tempEff = (av * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100))/((getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                        av = steps[0] + ((steps[1] - steps[0]) / 2);
+                        tempEff = (av * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus / 100)) / ((getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100) * (getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus / 100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100));
                         eff += tempEff;
-                    }
-                    else if(!checkForMod('critDamage', index, location)){
+                    } else if (!checkForMod('critDamage', index, location)) {
                         steps = game.heirlooms.Shield.critDamage.steps[loom.rarity];
-                        av = steps[0] + ((steps[1] - steps[0])/2);
-                        tempEff = (av * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100))/((getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus/100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus/100));
+                        av = steps[0] + ((steps[1] - steps[0]) / 2);
+                        tempEff = (av * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100)) / ((getPlayerCritDamageMult() - game.heirlooms.Shield.critDamage.currentBonus / 100) * (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100) + 1 - (getPlayerCritChance() - game.heirlooms.Shield.critChance.currentBonus / 100));
                         eff += tempEff;
                     }
                 }
-                if(loom.type == 'Staff') {
+                if (loom.type == 'Staff') {
                     steps = game.heirlooms.defaultSteps[loom.rarity];
-                    av = steps[0] + ((steps[1] - steps[0])/2);
-                    if(!checkForMod('MinerSpeed', index, location) || !checkForMod('metalDrop', index, location)){
-                    eff += 0.75*av/100;
-                    }
-                    else if(!checkForMod('LumberjackSpeed', index, location) || !checkForMod('FarmerSpeed', index, location) || !checkForMod('DragimpSpeed', index, location)){
-                    eff += 0.5*av/100;
+                    av = steps[0] + ((steps[1] - steps[0]) / 2);
+                    if (!checkForMod('MinerSpeed', index, location) || !checkForMod('metalDrop', index, location)) {
+                        eff += 0.75 * av / 100;
+                    } else if (!checkForMod('LumberjackSpeed', index, location) || !checkForMod('FarmerSpeed', index, location) || !checkForMod('DragimpSpeed', index, location)) {
+                        eff += 0.5 * av / 100;
                     }
                 }
                 break;
-            //metalDrop? trimpHealth?
+                //metalDrop? trimpHealth?
         }
     }
-    if(upgrade) return bestUpgrade;
+    if (upgrade) return bestUpgrade;
     return eff;
 }
 
-function checkForMod(what, loom, location){
+function checkForMod(what, loom, location) {
     var heirloom = game.global[location][loom];
-    for (var mod in heirloom.mods){
+    for (var mod in heirloom.mods) {
         if (heirloom.mods[mod][0] == what) return true;
     }
     return false;
@@ -755,17 +754,15 @@ function getEnemyMaxAttack(world, level, name, diff) {
     var adjWorld = ((world - 1) * 100) + level;
     amt += 50 * Math.sqrt(world * Math.pow(3.27, world));
     amt -= 10;
-    if (world == 1){
+    if (world == 1) {
         amt *= 0.35;
         amt = (amt * 0.20) + ((amt * 0.75) * (level / 100));
-    }
-    else if (world == 2){
+    } else if (world == 2) {
         amt *= 0.5;
         amt = (amt * 0.32) + ((amt * 0.68) * (level / 100));
-    }
-    else if (world < 60)
+    } else if (world < 60)
         amt = (amt * 0.375) + ((amt * 0.7) * (level / 100));
-    else{
+    else {
         amt = (amt * 0.4) + ((amt * 0.9) * (level / 100));
         amt *= Math.pow(1.15, world - 59);
     }
@@ -811,10 +808,10 @@ function getBreedTime(remaining) {
     potencyMod += (potencyMod * game.portal.Pheromones.level * game.portal.Pheromones.modifier);
     if (game.jobs.Geneticist.owned > 0) potencyMod *= Math.pow(0.98, game.jobs.Geneticist.owned);
     if (game.unlocks.quickTrimps) potencyMod *= 2;
-    if (game.global.challengeActive == "Toxicity" && game.challenges.Toxicity.stacks > 0){
-    potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks);
+    if (game.global.challengeActive == "Toxicity" && game.challenges.Toxicity.stacks > 0) {
+        potencyMod *= Math.pow(game.challenges.Toxicity.stackMult, game.challenges.Toxicity.stacks);
     }
-    if (game.global.voidBuff == "slowBreed"){
+    if (game.global.voidBuff == "slowBreed") {
         potencyMod *= 0.2;
 
     }
@@ -827,7 +824,7 @@ function getBreedTime(remaining) {
     var timeRemaining = log10((trimpsMax - trimps.employed) / (trimps.owned - trimps.employed)) / log10(1 + (potencyMod / 10));
     if (!game.global.brokenPlanet) timeRemaining /= 10;
     timeRemaining = Math.floor(timeRemaining);
-    if(remaining) return timeRemaining;
+    if (remaining) return timeRemaining;
     var fullBreed = 0;
     var adjustedMax = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : trimps.maxSoldiers;
     var totalTime = log10((trimpsMax - trimps.employed) / ((trimpsMax - adjustedMax) - trimps.employed)) / log10(1 + (potencyMod / 10));
@@ -901,7 +898,7 @@ function buyStorage() {
         var owned = game.resources[Bs[B]].owned;
         var max = game.resources[Bs[B]].max * packMod;
         max = calcHeirloomBonus("Shield", "storageSize", max);
-        if(game.global.mapsActive && game.unlocks.imps.Jestimp) {
+        if (game.global.mapsActive && game.unlocks.imps.Jestimp) {
             jest = simpleSeconds(Bs[B], 45);
             jest = scaleToCurrentMap(jest);
         }
@@ -917,7 +914,7 @@ function buyStorage() {
 
 //Buy all non-storage buildings
 function buyBuildings() {
-    if((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
+    if ((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
         return;
     highlightHousing();
 
@@ -931,7 +928,7 @@ function buyBuildings() {
         buyFoodEfficientHousing();
     }
 
-    if(getPageSetting('MaxWormhole') > 0 && game.buildings.Wormhole.owned < getPageSetting('MaxWormhole') && !game.buildings.Wormhole.locked) safeBuyBuilding('Wormhole');
+    if (getPageSetting('MaxWormhole') > 0 && game.buildings.Wormhole.owned < getPageSetting('MaxWormhole') && !game.buildings.Wormhole.locked) safeBuyBuilding('Wormhole');
 
     //Buy non-housing buildings
     if (!game.buildings.Gym.locked && (getPageSetting('MaxGym') > game.buildings.Gym.owned || getPageSetting('MaxGym') == -1)) {
@@ -953,7 +950,7 @@ function buyBuildings() {
 function setTitle() {
     document.title = '(' + game.global.world + ')' + ' Trimps ' + document.getElementById('versionNumber').innerHTML;
     //for the dummies like me who always forget to turn automaps back on after portaling
-    if(getPageSetting('RunUniqueMaps') && !game.upgrades.Battle.done && autoTrimpSettings.RunMapsWhenStuck.enabled == false) {
+    if (getPageSetting('RunUniqueMaps') && !game.upgrades.Battle.done && autoTrimpSettings.RunMapsWhenStuck.enabled == false) {
         settingChanged("RunMapsWhenStuck");
     }
 }
@@ -999,29 +996,29 @@ function buyJobs() {
             var buyScientists = Math.floor((scientistRatio / totalRatio * totalDistributableWorkers) - game.jobs.Scientist.owned);
             //bandaid to prevent situation where 1 scientist is bought, causing floor calculation to drop by 1, making next calculation -1 and entering hiring/firing loop
             //proper fix is including scientists in totalDistributableWorkers and the scientist ratio in the total ratio, but then it waits for 4 jobs
-            if(buyScientists > 0 && freeWorkers > 0) safeBuyJob('Scientist', buyScientists);
+            if (buyScientists > 0 && freeWorkers > 0) safeBuyJob('Scientist', buyScientists);
         }
         //once over 250k farmers, fire our scientists and rely on manual gathering of science
-        else if (game.jobs.Scientist.owned > 0) 
+        else if (game.jobs.Scientist.owned > 0)
             safeBuyJob('Scientist', game.jobs.Scientist.owned * -1);
     }
     //Distribute Farmer/Lumberjack/Miner breedfire
-    if(!game.jobs.Farmer.locked && !breedFire)
+    if (!game.jobs.Farmer.locked && !breedFire)
         safeBuyJob('Farmer', Math.floor((farmerRatio / totalRatio * totalDistributableWorkers) - game.jobs.Farmer.owned));
     // else if(breedFire)
     // safeBuyJob('Farmer', game.jobs.Farmer.owned * -1);
-    if(!game.jobs.Lumberjack.locked && !breedFire)
+    if (!game.jobs.Lumberjack.locked && !breedFire)
         safeBuyJob('Lumberjack', Math.floor((lumberjackRatio / totalRatio * totalDistributableWorkers) - game.jobs.Lumberjack.owned));
-    else if(breedFire)
+    else if (breedFire)
         safeBuyJob('Lumberjack', game.jobs.Lumberjack.owned * -1);
-    if(!game.jobs.Miner.locked && !breedFire)
+    if (!game.jobs.Miner.locked && !breedFire)
         safeBuyJob('Miner', Math.floor((minerRatio / totalRatio * totalDistributableWorkers) - game.jobs.Miner.owned));
-    else if(breedFire && game.global.turkimpTimer === 0)
+    else if (breedFire && game.global.turkimpTimer === 0)
         safeBuyJob('Miner', game.jobs.Miner.owned * -1);
 }
 
 function autoLevelEquipment() {
-    if((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
+    if ((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
         return;
     var Best = {
         'healthwood': {
@@ -1053,13 +1050,13 @@ function autoLevelEquipment() {
     var enemyHealth = getEnemyMaxHealth(game.global.world + 1);
 
     //below challenge multiplier not necessarily accurate, just fudge factors
-    if(game.global.challengeActive == "Toxicity") {
+    if (game.global.challengeActive == "Toxicity") {
         //ignore damage changes (which would effect how much health we try to buy) entirely since we die in 20 attacks anyway?
-        if(game.global.world < 61)
+        if (game.global.world < 61)
             enemyDamage *= 2;
         enemyHealth *= 2;
     }
-    if(game.global.challengeActive == 'Lead') {
+    if (game.global.challengeActive == 'Lead') {
         enemyDamage *= 2.5;
         enemyHealth *= 7;
     }
@@ -1148,40 +1145,33 @@ function manualLabor() {
     var ManualGather = 'metal';
     var breedingTrimps = game.resources.trimps.owned - game.resources.trimps.employed;
 
-    if(breedingTrimps < 5 && game.buildings.Trap.owned == 0 && canAffordBuilding('Trap')) {
+    if (breedingTrimps < 5 && game.buildings.Trap.owned == 0 && canAffordBuilding('Trap')) {
         //safeBuyBuilding returns false if item is already in queue
-        if(!safeBuyBuilding('Trap'))
-        setGather('buildings');
-    }
-    else if (breedingTrimps < 5 && game.buildings.Trap.owned > 0) {
+        if (!safeBuyBuilding('Trap'))
+            setGather('buildings');
+    } else if (breedingTrimps < 5 && game.buildings.Trap.owned > 0) {
         setGather('trimps');
-    }
-   else if (game.resources.science.owned < 100 && document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden') setGather('science');
+    } else if (game.resources.science.owned < 100 && document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden') setGather('science');
     //if we have more than 2 buildings in queue, or (our modifier is real fast and trapstorm is off), build
-   else if (game.global.buildingsQueue.length ? (game.global.buildingsQueue.length > 1 || game.global.autoCraftModifier == 0 || (getPlayerModifier() > 1000 && game.global.buildingsQueue[0] != 'Trap.1')) : false) {
+    else if (game.global.buildingsQueue.length ? (game.global.buildingsQueue.length > 1 || game.global.autoCraftModifier == 0 || (getPlayerModifier() > 1000 && game.global.buildingsQueue[0] != 'Trap.1')) : false) {
         // debug('Gathering buildings??');
         setGather('buildings');
     }
     //if we have some upgrades sitting around which we don't have enough science for, gather science
     else if (game.resources.science.owned < scienceNeeded && document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden') {
         // debug('Science needed ' + scienceNeeded);
-        if (getPlayerModifier() < getPerSecBeforeManual('Scientist') && game.global.turkimpTimer > 0){
+        if (getPlayerModifier() < getPerSecBeforeManual('Scientist') && game.global.turkimpTimer > 0) {
             //if manual is less than half of science production switch on turkimp
             setGather('metal');
-        }
-        else {
+        } else {
             setGather('science');
         }
-    }
-    else if (getPageSetting('TrapTrimps') && parseInt(getPageSetting('GeneticistTimer')) < getBreedTime(true) && game.buildings.Trap.owned < 1 && canAffordBuilding('Trap')) {
-                safeBuyBuilding('Trap');
-                setGather('buildings');
-    }
-    else if (getPageSetting('TrapTrimps') && parseInt(getPageSetting('GeneticistTimer')) < getBreedTime(true) && game.buildings.Trap.owned > 0) {
+    } else if (getPageSetting('TrapTrimps') && parseInt(getPageSetting('GeneticistTimer')) < getBreedTime(true) && game.buildings.Trap.owned < 1 && canAffordBuilding('Trap')) {
+        safeBuyBuilding('Trap');
+        setGather('buildings');
+    } else if (getPageSetting('TrapTrimps') && parseInt(getPageSetting('GeneticistTimer')) < getBreedTime(true) && game.buildings.Trap.owned > 0) {
         setGather('trimps');
-    }
-
-    else {
+    } else {
         var manualResourceList = {
             'food': 'Farmer',
             'wood': 'Lumberjack',
@@ -1221,12 +1211,11 @@ function manualLabor() {
         } else if (game.global.turkimpTimer > 0) {
             //debug('Set gather ManualGather');
             setGather('metal');
-        } else  if (game.resources.science.owned < getPsString('science', true) * 60 && document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden' && game.global.turkimpTimer < 1 && haveWorkers) {
+        } else if (game.resources.science.owned < getPsString('science', true) * 60 && document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden' && game.global.turkimpTimer < 1 && haveWorkers) {
             setGather('science');
-        }
-        else if(getPageSetting('TrapTrimps') && game.global.trapBuildToggled == true && game.buildings.Trap.owned < 10000)
+        } else if (getPageSetting('TrapTrimps') && game.global.trapBuildToggled == true && game.buildings.Trap.owned < 10000)
             setGather('buildings');
-          else if (document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden')
+        else if (document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden')
             setGather('science');
 
     }
@@ -1269,7 +1258,7 @@ function autoStance() {
         } else {
             enemy = game.global.gridArray[game.global.lastClearedCell + 1];
         }
-        var enemyFast = game.global.challengeActive != 'Nom' && (game.badGuys[enemy.name].fast || game.global.challengeActive == 'Slow' );
+        var enemyFast = game.global.challengeActive != 'Nom' && (game.badGuys[enemy.name].fast || game.global.challengeActive == 'Slow');
         var enemyHealth = enemy.health;
         //think this is fluctuation in calculateDamage();
         var enemyDamage = enemy.attack * 1.19;
@@ -1282,18 +1271,18 @@ function autoStance() {
         var pierceMod = 0;
         if (game.global.challengeActive == "Lead") pierceMod += (game.challenges.Lead.stacks * 0.001);
         var dDamage = enemyDamage - baseBlock / 2 > enemyDamage * (0.2 + pierceMod) ? enemyDamage - baseBlock / 2 : enemyDamage * (0.2 + pierceMod);
-        var dHealth = baseHealth/2;
+        var dHealth = baseHealth / 2;
         var xDamage = enemyDamage - baseBlock > enemyDamage * (0.2 + pierceMod) ? enemyDamage - baseBlock : enemyDamage * (0.2 + pierceMod);
         var xHealth = baseHealth;
         var bDamage = enemyDamage - baseBlock * 4 > enemyDamage * (0.1 + pierceMod) ? enemyDamage - baseBlock * 4 : enemyDamage * (0.1 + pierceMod);
-        var bHealth = baseHealth/2;
+        var bHealth = baseHealth / 2;
     } else if (game.global.mapsActive && !game.global.preMapsActive) {
         if (typeof game.global.mapGridArray[game.global.lastClearedMapCell + 1] === 'undefined') {
             var enemy = game.global.mapGridArray[0];
         } else {
             var enemy = game.global.mapGridArray[game.global.lastClearedMapCell + 1];
         }
-        var enemyFast = game.global.challengeActive != 'Nom' && (game.badGuys[enemy.name].fast || game.global.challengeActive == 'Slow'|| game.global.voidBuff == 'doubleAttack');
+        var enemyFast = game.global.challengeActive != 'Nom' && (game.badGuys[enemy.name].fast || game.global.challengeActive == 'Slow' || game.global.voidBuff == 'doubleAttack');
         var enemyHealth = enemy.health;
         var enemyDamage = enemy.attack * 1.19;
         if (game.global.challengeActive == 'Lead') {
@@ -1303,29 +1292,29 @@ function autoStance() {
             enemyDamage *= 1.25;
         }
         var dDamage = enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : 0;
-        var dHealth = baseHealth/2;
+        var dHealth = baseHealth / 2;
         var xDamage = enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : 0;
         var xHealth = baseHealth;
         var bDamage = enemyDamage - baseBlock * 4 > 0 ? enemyDamage - baseBlock * 4 : 0;
-        var bHealth = baseHealth/2;
+        var bHealth = baseHealth / 2;
 
     }
-        var drainChallenge = game.global.challengeActive == 'Nom' || game.global.challengeActive == "Toxicity";
+    var drainChallenge = game.global.challengeActive == 'Nom' || game.global.challengeActive == "Toxicity";
 
-        if (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse") {
-            dDamage+= dHealth * game.global.radioStacks * 0.1;
-            xDamage+= xHealth * game.global.radioStacks * 0.1;
-            bDamage+= bHealth * game.global.radioStacks * 0.1;
-        } else if (drainChallenge) {
-            dDamage += dHealth/20;
-            xDamage += xHealth/20;
-            bDamage += bHealth/20;
-        } else if (game.global.challengeActive == "Crushed") {
-            if(dHealth > baseBlock /2)
-            dDamage = enemyDamage*5 - baseBlock / 2 > 0 ? enemyDamage*5 - baseBlock / 2 : 0;
-            if(xHealth > baseBlock)
-            xDamage = enemyDamage*5 - baseBlock > 0 ? enemyDamage*5 - baseBlock : 0;
-        }
+    if (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse") {
+        dDamage += dHealth * game.global.radioStacks * 0.1;
+        xDamage += xHealth * game.global.radioStacks * 0.1;
+        bDamage += bHealth * game.global.radioStacks * 0.1;
+    } else if (drainChallenge) {
+        dDamage += dHealth / 20;
+        xDamage += xHealth / 20;
+        bDamage += bHealth / 20;
+    } else if (game.global.challengeActive == "Crushed") {
+        if (dHealth > baseBlock / 2)
+            dDamage = enemyDamage * 5 - baseBlock / 2 > 0 ? enemyDamage * 5 - baseBlock / 2 : 0;
+        if (xHealth > baseBlock)
+            xDamage = enemyDamage * 5 - baseBlock > 0 ? enemyDamage * 5 - baseBlock : 0;
+    }
     if (game.global.voidBuff == "bleed") {
         dDamage += game.global.soldierHealth * 0.2;
         xDamage += game.global.soldierHealth * 0.2;
@@ -1336,10 +1325,10 @@ function autoStance() {
     var leadDamage = game.challenges.Lead.stacks * 0.0005;
     //lead attack ok if challenge isn't lead, or we are going to one shot them, or we can survive the lead damage
     var leadAttackOK = game.global.challengeActive != 'Lead' || enemyHealth < baseDamage * (game.global.titimpLeft > 0 ? 4 : 2) || ((newSquadRdy && dHealth > dDamage + (dHealth * leadDamage)) || (dHealth - missingHealth > dDamage + (dHealth * leadDamage)));
-        //add voidcrit?
-        //this thing is getting too messy - any more special crap and this needs a bunch of flag variables or something
+    //add voidcrit?
+    //this thing is getting too messy - any more special crap and this needs a bunch of flag variables or something
     if (!game.global.preMapsActive && game.global.soldierHealth > 0) {
-        if (!enemyFast && game.upgrades.Dominance.done && enemyHealth < baseDamage * (game.global.titimpLeft > 0 ? 4 : 2) && (newSquadRdy || (dHealth - missingHealth > 0 && !drainChallenge) || (drainChallenge && dHealth - missingHealth > dHealth/20))) {
+        if (!enemyFast && game.upgrades.Dominance.done && enemyHealth < baseDamage * (game.global.titimpLeft > 0 ? 4 : 2) && (newSquadRdy || (dHealth - missingHealth > 0 && !drainChallenge) || (drainChallenge && dHealth - missingHealth > dHealth / 20))) {
             if (game.global.formation != 2) {
                 setFormation(2);
             }
@@ -1376,11 +1365,11 @@ var voidCheckPercent = 0;
 
 function autoMap() {
     //allow script to handle abandoning
-    if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
+    if (game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
 
     //if we should be farming, we will continue farming until attack/damage is under 10, if we shouldn't be farming, we will start if attack/damage rises above 15
     //add crit in somehow?
-    if(!getPageSetting('DisableFarm')) {
+    if (!getPageSetting('DisableFarm')) {
         if (game.global.challengeActive == 'Lead')
             shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world + 1) / baseDamage > 10 : getEnemyMaxHealth(game.global.world + 1) / baseDamage > 15;
         else
@@ -1393,16 +1382,16 @@ function autoMap() {
         var enemyHealth = getEnemyMaxHealth(game.global.world + 1);
 
         needPrestige = (autoTrimpSettings.Prestige.selected != "Off" && game.mapUnlocks[autoTrimpSettings.Prestige.selected].last <= game.global.world - 5 && game.global.mapsUnlocked && game.global.challengeActive != "Frugal");
-        if(game.global.challengeActive == "Toxicity") {
+        if (game.global.challengeActive == "Toxicity") {
             //ignore damage changes (which would effect how much health we try to buy) entirely since we die in 20 attacks anyway?
             //enemyDamage *= 2;
             enemyHealth *= 2;
         }
-        if(game.global.challengeActive == 'Lead') {
+        if (game.global.challengeActive == 'Lead') {
             enemyDamage *= 2.5;
             enemyHealth *= 2.5;
         }
-        if(game.global.totalVoidMaps == 0 || !needToVoid)
+        if (game.global.totalVoidMaps == 0 || !needToVoid)
             doVoids = false;
 
         enoughHealth = (baseHealth * 4 > 30 * (enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : enemyDamage * 0.2) || baseHealth > 30 * (enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : enemyDamage * 0.2));
@@ -1411,33 +1400,32 @@ function autoMap() {
         var shouldDoMap = "world";
 
         //if we are at max map bonus, and we don't need to farm, don't do maps
-        if(game.global.mapBonus == 10 && !shouldFarm) shouldDoMaps = false;
+        if (game.global.mapBonus == 10 && !shouldFarm) shouldDoMaps = false;
         //if we are prestige mapping, force equip first mode
-        if(autoTrimpSettings.Prestige.selected != "Off" && game.options.menu.mapLoot.enabled != 1) toggleSetting('mapLoot');
+        if (autoTrimpSettings.Prestige.selected != "Off" && game.options.menu.mapLoot.enabled != 1) toggleSetting('mapLoot');
         //if player has selected arbalest or gambeson but doesn't have them unlocked, just unselect it for them! It's magic!
-        if(document.getElementById('Prestige').selectedIndex > 11 && game.global.slowDone == false) {
+        if (document.getElementById('Prestige').selectedIndex > 11 && game.global.slowDone == false) {
             document.getElementById('Prestige').selectedIndex = 11;
             autoTrimpSettings.Prestige.selected = "Bestplate";
         }
 
         //stack tox stacks if we are doing max tox, or if we need to clear our void maps
-        if(game.global.challengeActive == 'Toxicity' && game.global.lastClearedCell > 93 && game.challenges.Toxicity.stacks < 1500 && ((getPageSetting('MaxTox') && game.global.world > 59) || needToVoid)) {
+        if (game.global.challengeActive == 'Toxicity' && game.global.lastClearedCell > 93 && game.challenges.Toxicity.stacks < 1500 && ((getPageSetting('MaxTox') && game.global.world > 59) || needToVoid)) {
             shouldDoMaps = true;
             stackingTox = true;
             //force abandon army
-            if(!game.global.mapsActive && !game.global.preMapsActive) {
+            if (!game.global.mapsActive && !game.global.preMapsActive) {
                 mapsClicked();
                 mapsClicked();
             }
-        }
-        else stackingTox = false;
+        } else stackingTox = false;
 
         var obj = {};
         var siphonMap = -1;
         for (var map in game.global.mapsOwnedArray) {
             if (!game.global.mapsOwnedArray[map].noRecycle) {
                 obj[map] = game.global.mapsOwnedArray[map].level;
-                if(game.global.mapsOwnedArray[map].level == (game.global.world - game.portal.Siphonology.level))
+                if (game.global.mapsOwnedArray[map].level == (game.global.world - game.portal.Siphonology.level))
                     siphonMap = map;
             }
         }
@@ -1452,40 +1440,39 @@ function autoMap() {
         //Look through all the maps we have - find Uniques or Voids and figure out if we need to run them.
         for (var map in game.global.mapsOwnedArray) {
             var theMap = game.global.mapsOwnedArray[map];
-                //clear void maps if we need to
-            if(theMap.location == 'Void' && needToVoid) {
-                    //if we are on toxicity, don't clear until we will have max stacks at the last cell.
-                    if(game.global.challengeActive == 'Toxicity' && game.challenges.Toxicity.stacks < (1500 - theMap.size)) break;
-                    doVoids = true;
-                    //check to make sure we won't get 1-shot in nostance by boss
-                    var eAttack = getEnemyMaxAttack(game.global.world, theMap.size, 'Voidsnimp', theMap.difficulty);
-                    var ourHealth = baseHealth;
-                    if(game.global.challengeActive == 'Balance') {
-                        var stacks = game.challenges.Balance.balanceStacks ? (game.challenges.Balance.balanceStacks > theMap.size) ? theMap.size : game.challenges.Balance.balanceStacks : false;
-                        eAttack *= 2;
-                        if(stacks) {
-                            for (i = 0; i < stacks; i++ ) {
-                                ourHealth *= 1.01;
-                            }
+            //clear void maps if we need to
+            if (theMap.location == 'Void' && needToVoid) {
+                //if we are on toxicity, don't clear until we will have max stacks at the last cell.
+                if (game.global.challengeActive == 'Toxicity' && game.challenges.Toxicity.stacks < (1500 - theMap.size)) break;
+                doVoids = true;
+                //check to make sure we won't get 1-shot in nostance by boss
+                var eAttack = getEnemyMaxAttack(game.global.world, theMap.size, 'Voidsnimp', theMap.difficulty);
+                var ourHealth = baseHealth;
+                if (game.global.challengeActive == 'Balance') {
+                    var stacks = game.challenges.Balance.balanceStacks ? (game.challenges.Balance.balanceStacks > theMap.size) ? theMap.size : game.challenges.Balance.balanceStacks : false;
+                    eAttack *= 2;
+                    if (stacks) {
+                        for (i = 0; i < stacks; i++) {
+                            ourHealth *= 1.01;
                         }
                     }
-                    if(game.global.challengeActive == 'Toxicity') eAttack *= 5;
-                    //break to prevent finishing map to finish a challenge?
-                    //continue to check for doable map?
-                    var diff = parseInt(getPageSetting('VoidCheck')) > 0 ? parseInt(getPageSetting('VoidCheck')) : 2;
-                    if(ourHealth/diff < eAttack - baseBlock) {
-                        shouldFarm = true;
-                        voidCheckPercent = Math.round((ourHealth/diff)/(eAttack-baseBlock)*100);
-                        break;
-                    }
-                    else {
-                        voidCheckPercent = 0;
-                        if(getPageSetting('DisableFarm'))
-                            shouldFarm = false;
-                    }
+                }
+                if (game.global.challengeActive == 'Toxicity') eAttack *= 5;
+                //break to prevent finishing map to finish a challenge?
+                //continue to check for doable map?
+                var diff = parseInt(getPageSetting('VoidCheck')) > 0 ? parseInt(getPageSetting('VoidCheck')) : 2;
+                if (ourHealth / diff < eAttack - baseBlock) {
+                    shouldFarm = true;
+                    voidCheckPercent = Math.round((ourHealth / diff) / (eAttack - baseBlock) * 100);
+                    break;
+                } else {
+                    voidCheckPercent = 0;
+                    if (getPageSetting('DisableFarm'))
+                        shouldFarm = false;
+                }
                 shouldDoMap = theMap.id;
-                if(game.global.mapsActive && game.global.challengeActive == "Nom") {
-                    if(game.global.mapGridArray[game.global.lastClearedMapCell + 1].nomStacks > 6) {
+                if (game.global.mapsActive && game.global.challengeActive == "Nom") {
+                    if (game.global.mapGridArray[game.global.lastClearedMapCell + 1].nomStacks > 6) {
                         mapsClicked(true);
                     }
                 }
@@ -1500,29 +1487,29 @@ function autoMap() {
                 }
                 if (theMap.name == 'Dimension of Anger' && document.getElementById("portalBtn").style.display == "none") {
                     var doaDifficulty = Math.ceil(theMap.difficulty / 2);
-                    if(game.global.world < 20 + doaDifficulty) continue;
+                    if (game.global.world < 20 + doaDifficulty) continue;
                     shouldDoMap = theMap.id;
                     break;
                 }
                 //run the prison only if we are 'cleared' to run level 80 + 1 level per 200% difficulty. Could do more accurate calc if needed
-                if(theMap.name == 'The Prison' && (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse")) {
+                if (theMap.name == 'The Prison' && (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse")) {
                     var prisonDifficulty = Math.ceil(theMap.difficulty / 2);
-                    if(game.global.world >= 80 + prisonDifficulty) {
+                    if (game.global.world >= 80 + prisonDifficulty) {
                         shouldDoMap = theMap.id;
                         break;
                     }
                 }
-                if(theMap.name == 'The Block' && !game.upgrades.Shieldblock.allowed && (game.global.challengeActive == "Scientist" || game.global.challengeActive == "Trimp" || getPageSetting('BuyShieldblock'))) {
+                if (theMap.name == 'The Block' && !game.upgrades.Shieldblock.allowed && (game.global.challengeActive == "Scientist" || game.global.challengeActive == "Trimp" || getPageSetting('BuyShieldblock'))) {
                     shouldDoMap = theMap.id;
                     break;
                 }
-                if(theMap.name == 'Trimple of Doom' && game.global.challengeActive == "Meditate") {
+                if (theMap.name == 'Trimple of Doom' && game.global.challengeActive == "Meditate") {
                     shouldDoMap = theMap.id;
                     break;
                 }
-                if(theMap.name == 'Bionic Wonderland' && game.global.challengeActive == "Crushed" ) {
+                if (theMap.name == 'Bionic Wonderland' && game.global.challengeActive == "Crushed") {
                     var wonderlandDifficulty = Math.ceil(theMap.difficulty / 2);
-                    if(game.global.world >= 125 + wonderlandDifficulty) {
+                    if (game.global.world >= 125 + wonderlandDifficulty) {
                         shouldDoMap = theMap.id;
                         break;
                     }
@@ -1533,7 +1520,7 @@ function autoMap() {
 
         }
         //shouldFarm is true here if: regular shouldFarm check set it, or voidMap difficulty check set it
-        if (shouldDoMaps && siphonMap == -1 && !needPrestige) 
+        if (shouldDoMaps && siphonMap == -1 && !needPrestige)
             shouldDoMap = "create";
 
         //map if we don't have health/dmg or we need to clear void maps or if we are prestige mapping, and our set item has a new prestige available
@@ -1542,7 +1529,7 @@ function autoMap() {
             //if shouldDoMap != world, it already has a map ID and will be run below
             if (shouldDoMap == "world") {
                 //use a siphonology adjusted map, as long as we aren't trying to prestige
-                if (shouldDoMaps && !needPrestige) 
+                if (shouldDoMaps && !needPrestige)
                     shouldDoMap = game.global.mapsOwnedArray[siphonMap].id;
                 else if (game.global.world == game.global.mapsOwnedArray[highestMap].level) {
                     shouldDoMap = game.global.mapsOwnedArray[highestMap].id;
@@ -1555,11 +1542,11 @@ function autoMap() {
         }
 
         //don't map on even worlds if on Lead, except if person is dumb and wants to void on even
-        if(game.global.challengeActive == 'Lead' && !doVoids && (game.global.world % 2 == 0 || game.global.lastClearedCell < 50)) {
-            if(game.global.preMapsActive)
+        if (game.global.challengeActive == 'Lead' && !doVoids && (game.global.world % 2 == 0 || game.global.lastClearedCell < 50)) {
+            if (game.global.preMapsActive)
                 mapsClicked();
             return;
-       }
+        }
         //repeat button management
         if (!game.global.preMapsActive) {
             if (game.global.mapsActive) {
@@ -1571,11 +1558,11 @@ function autoMap() {
                         repeatClicked();
                     }
                     //if we aren't here for dmg/hp, and we see the prestige we are after on the last cell of this map, and it's the last one available, turn off repeat to avoid an extra map cycle
-                    if (!shouldDoMaps && (game.global.mapGridArray[game.global.mapGridArray.length - 1].special == targetPrestige && game.mapUnlocks[targetPrestige].last >= game.global.world - 9 )) {
+                    if (!shouldDoMaps && (game.global.mapGridArray[game.global.mapGridArray.length - 1].special == targetPrestige && game.mapUnlocks[targetPrestige].last >= game.global.world - 9)) {
                         repeatClicked();
                     }
                     //avoid another map cycle due to having the amount of tox stacks we need.
-                    if (stackingTox && (game.challenges.Toxicity.stacks + game.global.mapGridArray.length - (game.global.lastClearedMapCell + 1) >= 1500)){
+                    if (stackingTox && (game.challenges.Toxicity.stacks + game.global.mapGridArray.length - (game.global.lastClearedMapCell + 1) >= 1500)) {
                         repeatClicked();
                     }
                 } else {
@@ -1588,21 +1575,20 @@ function autoMap() {
                 if (shouldDoMap != "world") {
                     //if shouldFarm, don't switch until after megafarming
                     if (!game.global.switchToMaps && ((shouldFarm && game.global.lastClearedCell > 79) || !shouldFarm)) {
-                         mapsClicked();
+                        mapsClicked();
                     }
                     //if (prestige mapping or need to do void maps or on lead in odd world) abandon army if (a new army is ready or need to void map and we're almost done with the zone)
-                    if(game.global.switchToMaps && ((game.global.challengeActive == 'Lead' && game.global.world % 2 == 1) || doVoids || needPrestige) && ((shouldFarm && game.global.challengeActive == 'Lead') || game.resources.trimps.realMax() <= game.resources.trimps.owned + 1 || (doVoids && game.global.lastClearedCell > 95)))
-                             mapsClicked();
+                    if (game.global.switchToMaps && ((game.global.challengeActive == 'Lead' && game.global.world % 2 == 1) || doVoids || needPrestige) && ((shouldFarm && game.global.challengeActive == 'Lead') || game.resources.trimps.realMax() <= game.resources.trimps.owned + 1 || (doVoids && game.global.lastClearedCell > 95)))
+                        mapsClicked();
                 }
             }
         } else if (game.global.preMapsActive) {
             if (shouldDoMap == "world") {
-                mapsClicked();  //go back
-            }
-            else if (shouldDoMap == "create") {
+                mapsClicked(); //go back
+            } else if (shouldDoMap == "create") {
                 //create a siphonology level map if not prestiging (void map diff check consideration here?)
                 var mapLevel = game.global.world;
-                if(shouldDoMaps && !needPrestige) {
+                if (shouldDoMaps && !needPrestige) {
                     mapLevel -= game.portal.Siphonology.level;
                 }
                 // Ensure the wanted map level is at least 6
@@ -1640,7 +1626,7 @@ function autoMap() {
                     updateMapCost();
                 }
                 //if we are farming (for resources), make sure it's metal, and put low priority on size
-                if(shouldFarm) {
+                if (shouldFarm) {
                     biomeAdvMapsSelect.value = "Mountain";
                     while (sizeAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
                         sizeAdvMapsRange.value -= 1;
@@ -1657,9 +1643,9 @@ function autoMap() {
                     selectMap(game.global.mapsOwnedArray[highestMap].id);
                     runMap();
                 } else {
-                    if(buyMap() == -2){
+                    if (buyMap() == -2) {
                         recycleBelow(true);
-                         buyMap();
+                        buyMap();
                     }
                 }
                 //if we already have a map picked, run it
@@ -1672,26 +1658,26 @@ function autoMap() {
 }
 
 //calculate helium we will get from the end of this zone. If (stacks), return helium we will get with max tox stacks
-function calculateHelium (stacks) {
+function calculateHelium(stacks) {
     var world = game.global.world;
     var level = 100 + ((world - 1) * 100);
     var amt = 0;
     var baseAmt;
 
-    if(world < 59) baseAmt = 1;
+    if (world < 59) baseAmt = 1;
     else baseAmt = 5;
 
     level = Math.round((level - 1900) / 100);
     level *= 1.35;
-    if(level < 0) level = 0;
+    if (level < 0) level = 0;
     amt += Math.round(baseAmt * Math.pow(1.23, Math.sqrt(level)));
     amt += Math.round(baseAmt * level);
 
     if (game.portal.Looting.level) amt += (amt * game.portal.Looting.level * game.portal.Looting.modifier);
 
-    if (game.global.challengeActive == "Toxicity"){
+    if (game.global.challengeActive == "Toxicity") {
         var toxMult = (game.challenges.Toxicity.lootMult * game.challenges.Toxicity.stacks) / 100;
-        if(toxMult > 2.25 || stacks) toxMult = 2.25;
+        if (toxMult > 2.25 || stacks) toxMult = 2.25;
         amt *= (1 + toxMult);
     }
     amt = Math.floor(amt);
@@ -1700,41 +1686,42 @@ function calculateHelium (stacks) {
 
 //calculate our helium per hour including our helium for the end of this zone, assuming we finish the zone right now (and get that helium right now)
 //if (stacked), calculate with maximum toxicity stacks
-function calculateNextHeliumHour (stacked) {
+function calculateNextHeliumHour(stacked) {
     var timeThisPortal = new Date().getTime() - game.global.portalTime;
     timeThisPortal /= 3600000;
     var heliumNow = Math.floor((game.resources.helium.owned + calculateHelium()) / timeThisPortal);
-    if(stacked) heliumNow = Math.floor((game.resources.helium.owned + calculateHelium(true)) / (timeThisPortal + (1500 - game.challenges.Toxicity.stacks) / 7200000));
+    if (stacked) heliumNow = Math.floor((game.resources.helium.owned + calculateHelium(true)) / (timeThisPortal + (1500 - game.challenges.Toxicity.stacks) / 7200000));
     return heliumNow;
 }
 
 
 var lastHelium = 0;
 var lastZone = 0;
+
 function autoPortal() {
     switch (autoTrimpSettings.AutoPortal.selected) {
         //portal if we have lower He/hr than the previous zone
         case "Helium Per Hour":
-            if(game.global.world > lastZone) {
+            if (game.global.world > lastZone) {
                 lastZone = game.global.world;
                 var timeThisPortal = new Date().getTime() - game.global.portalTime;
-                    timeThisPortal /= 3600000;
-                    var myHelium = Math.floor(game.resources.helium.owned / timeThisPortal);
-                    if(myHelium < lastHelium && !game.global.challengeActive) {
-                        pushData();
-                        if(autoTrimpSettings.HeliumHourChallenge.selected != 'None')
-                            doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
-                        else
-                            doPortal();
-                    } else {
-                        lastHelium = myHelium;
-                    }
+                timeThisPortal /= 3600000;
+                var myHelium = Math.floor(game.resources.helium.owned / timeThisPortal);
+                if (myHelium < lastHelium && !game.global.challengeActive) {
+                    pushData();
+                    if (autoTrimpSettings.HeliumHourChallenge.selected != 'None')
+                        doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
+                    else
+                        doPortal();
+                } else {
+                    lastHelium = myHelium;
+                }
             }
             break;
         case "Custom":
-            if(game.global.world > getPageSetting('CustomAutoPortal') && !game.global.challengeActive) {
+            if (game.global.world > getPageSetting('CustomAutoPortal') && !game.global.challengeActive) {
                 pushData();
-                if(autoTrimpSettings.HeliumHourChallenge.selected != 'None')
+                if (autoTrimpSettings.HeliumHourChallenge.selected != 'None')
                     doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
                 else
                     doPortal();
@@ -1747,7 +1734,7 @@ function autoPortal() {
         case "Toxicity":
         case "Watch":
         case "Lead":
-            if(!game.global.challengeActive) {
+            if (!game.global.challengeActive) {
                 pushData();
                 doPortal(autoTrimpSettings.AutoPortal.selected);
             }
@@ -1760,77 +1747,76 @@ function autoPortal() {
 function checkSettings() {
     var portalLevel = -1;
     var leadCheck = false;
-    switch(autoTrimpSettings.AutoPortal.selected) {
+    switch (autoTrimpSettings.AutoPortal.selected) {
         case "Off":
-        break;
+            break;
         case "Custom":
-        portalLevel = autoTrimpSettings.CustomAutoPortal.value + 1;
-        leadCheck = autoTrimpSettings.HeliumHourChallenge.selected == "Lead" ? true:false;
-        break;
+            portalLevel = autoTrimpSettings.CustomAutoPortal.value + 1;
+            leadCheck = autoTrimpSettings.HeliumHourChallenge.selected == "Lead" ? true : false;
+            break;
         case "Balance":
-        portalLevel = 41;
-        break;
+            portalLevel = 41;
+            break;
         case "Electricity":
-        portalLevel = 82;
-        break;
+            portalLevel = 82;
+            break;
         case "Crushed":
-        portalLevel = 126;
-        break;
+            portalLevel = 126;
+            break;
         case "Nom":
-        portalLevel = 146;
-        break;
+            portalLevel = 146;
+            break;
         case "Toxicity":
-        portalLevel = 166;
-        break;
+            portalLevel = 166;
+            break;
         case "Lead":
-        portalLevel = 181;
-        break;
+            portalLevel = 181;
+            break;
         case "Watch":
-        portalLevel = 181;
-        break;
+            portalLevel = 181;
+            break;
     }
-    if(portalLevel == -1)
+    if (portalLevel == -1)
         return;
-    if(autoTrimpSettings.VoidMaps.value >= portalLevel) {
-        tooltip('confirm', null, 'update', 'WARNING: Your void maps are set to complete after your autoPortal, and therefore will not be done at all! Please verify your settings. Remember you can choose \'Custom\' autoPortal along with challenges for complete control over when you portal. <br><br> Estimated autoPortal level: ' + portalLevel , 'cancelTooltip()', 'Void Maps Conflict');
+    if (autoTrimpSettings.VoidMaps.value >= portalLevel) {
+        tooltip('confirm', null, 'update', 'WARNING: Your void maps are set to complete after your autoPortal, and therefore will not be done at all! Please verify your settings. Remember you can choose \'Custom\' autoPortal along with challenges for complete control over when you portal. <br><br> Estimated autoPortal level: ' + portalLevel, 'cancelTooltip()', 'Void Maps Conflict');
         return;
     }
-    if((leadCheck || game.global.challengeActive == 'Lead') && (autoTrimpSettings.VoidMaps.value % 2 == 0 && portalLevel < 182))
+    if ((leadCheck || game.global.challengeActive == 'Lead') && (autoTrimpSettings.VoidMaps.value % 2 == 0 && portalLevel < 182))
         tooltip('confirm', null, 'update', 'WARNING: Voidmaps run during Lead on an Even zone do not receive the 2x Helium Bonus for Odd zones, and are also tougher. You should probably fix this.', 'cancelTooltip()', 'Lead Challenge Void Maps');
 }
 
 function doPortal(challenge) {
-    if(!game.global.portalActive) return;
+    if (!game.global.portalActive) return;
     portalClicked();
-    if(challenge) selectChallenge(challenge);
-        activateClicked();
-        activatePortal();
-        lastHelium = 0;
-        lastZone = 0;
+    if (challenge) selectChallenge(challenge);
+    activateClicked();
+    activatePortal();
+    lastHelium = 0;
+    lastZone = 0;
 }
 
 //adjust geneticists to reach desired breed timer
 function manageGenes() {
     var fWorkers = Math.ceil(game.resources.trimps.realMax() / 2) - game.resources.trimps.employed;
-    if(getPageSetting('ManageBreedtimer')) {
-        if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");
+    if (getPageSetting('ManageBreedtimer')) {
+        if (game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");
 
-        if(game.portal.Anticipation.level == 0) autoTrimpSettings.GeneticistTimer.value = '0';
-        else if(game.global.challengeActive == 'Electricity' || game.global.challengeActive == 'Mapocalypse') autoTrimpSettings.GeneticistTimer.value = '3.5';
-        else if(game.global.challengeActive == 'Nom' || game.global.challengeActive == 'Toxicity') {
+        if (game.portal.Anticipation.level == 0) autoTrimpSettings.GeneticistTimer.value = '0';
+        else if (game.global.challengeActive == 'Electricity' || game.global.challengeActive == 'Mapocalypse') autoTrimpSettings.GeneticistTimer.value = '3.5';
+        else if (game.global.challengeActive == 'Nom' || game.global.challengeActive == 'Toxicity') {
             //intent of below if is to push through past megafarming with 30 anti stacks if we need to farm,
             //but raising to 30 antistacks often turns shouldfarm off. Would need a separate shouldFarmNom variable that approximates at 10 stacks? Don't care enough to do now
             //if(shouldFarm && !game.global.mapsActive) autoTrimpSettings.GeneticistTimer.value = '30';
             autoTrimpSettings.GeneticistTimer.value = '11';
-        }
-        else autoTrimpSettings.GeneticistTimer.value = '30';
+        } else autoTrimpSettings.GeneticistTimer.value = '30';
     }
     var inDamageStance = game.upgrades.Dominance.done ? game.global.formation == 2 : game.global.formation == 0;
     var targetBreed = parseInt(getPageSetting('GeneticistTimer'));
     //if we need to hire geneticists
     //Don't hire geneticists if total breed time remaining is greater than our target breed time
     //Don't hire geneticists if we have already reached 30 anti stacks (put off further delay to next trimp group)
-    if (targetBreed > getBreedTime() && !game.jobs.Geneticist.locked && targetBreed > getBreedTime(true) && (game.global.lastBreedTime/1000 + getBreedTime(true) < 30) && game.resources.trimps.soldiers > 0 && inDamageStance && !breedFire) {
+    if (targetBreed > getBreedTime() && !game.jobs.Geneticist.locked && targetBreed > getBreedTime(true) && (game.global.lastBreedTime / 1000 + getBreedTime(true) < 30) && game.resources.trimps.soldiers > 0 && inDamageStance && !breedFire) {
         //insert 10% of total food limit here? or cost vs tribute?
         //if there's no free worker spots, fire a farmer
         if (fWorkers < 1 && canAffordJob('Geneticist', false)) {
@@ -1853,17 +1839,17 @@ function manageGenes() {
     //if our time remaining to full trimps is still too high, fire some jobs to get-er-done
     //needs option to toggle? advanced options?
     else if ((targetBreed < getBreedTime(true) || (game.resources.trimps.soldiers == 0 && getBreedTime(true) > 6)) && breedFire == false && getPageSetting('BreedFire') && game.global.world > 10) {
-            breedFire = true;
+        breedFire = true;
     }
-/*
-    //really should be integrated with the buyBuildings routine instead of here, but I think it's mostly harmless here
-    else if (targetBreed < getBreedTime() && getPageSetting('ManageBreedtimer') && !game.buildings.Nursery.locked) {
-        safeBuyBuilding('Nursery');
-    }
-*/
+    /*
+        //really should be integrated with the buyBuildings routine instead of here, but I think it's mostly harmless here
+        else if (targetBreed < getBreedTime() && getPageSetting('ManageBreedtimer') && !game.buildings.Nursery.locked) {
+            safeBuyBuilding('Nursery');
+        }
+    */
 
     //reset breedFire once we have less than 2 seconds remaining
-    if(getBreedTime(true) < 2) breedFire = false;
+    if (getBreedTime(true) < 2) breedFire = false;
 
 }
 
@@ -1886,8 +1872,8 @@ setTimeout(delayStart, 2000);
 
 function mainLoop() {
     game.global.addonUser = true;
-    if(getPageSetting('PauseScript')) return;
-    if(game.global.viewingUpgrades) return;
+    if (getPageSetting('PauseScript')) return;
+    if (game.global.viewingUpgrades) return;
     setTitle();
     setScienceNeeded();
     updateValueFields();
@@ -1930,7 +1916,7 @@ function mainLoop() {
         }
     }
     //auto-close breaking the world textbox
-    if(document.getElementById('tipTitle').innerHTML == 'The Improbability') cancelTooltip();
+    if (document.getElementById('tipTitle').innerHTML == 'The Improbability') cancelTooltip();
     autoLevelEquipment();
 
     if (getPageSetting('AutoFight')) {
@@ -1941,7 +1927,7 @@ function mainLoop() {
             }
         }
         lowLevelFight = game.resources.trimps.maxSoldiers < (game.resources.trimps.owned - game.resources.trimps.employed) * 0.5 && (game.resources.trimps.owned - game.resources.trimps.employed) > game.resources.trimps.realMax() * 0.1 && game.global.world < 5 && game.global.sLevel > 0;
-        if (game.upgrades.Battle.done && !game.global.fighting && game.global.gridArray.length !== 0 && !game.global.preMapsActive && (game.resources.trimps.realMax() <= game.resources.trimps.owned + 1 || game.global.soldierHealth > 0 || lowLevelFight )) {
+        if (game.upgrades.Battle.done && !game.global.fighting && game.global.gridArray.length !== 0 && !game.global.preMapsActive && (game.resources.trimps.realMax() <= game.resources.trimps.owned + 1 || game.global.soldierHealth > 0 || lowLevelFight)) {
             fightManual();
             // debug('triggered fight');
         }
@@ -1952,8 +1938,9 @@ function delayStart() {
     initializeAutoTrimps();
     setTimeout(delayStartAgain, 2000);
 }
-function delayStartAgain(){
-     setInterval(mainLoop, runInterval);
-     updateCustomButtons();
-     //setInterval(updateCustomButtons, 10000);
+
+function delayStartAgain() {
+    setInterval(mainLoop, runInterval);
+    updateCustomButtons();
+    //setInterval(updateCustomButtons, 10000);
 }

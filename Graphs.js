@@ -19,7 +19,7 @@ document.getElementById("settingsRow").innerHTML += '<div id="graphParent" style
 var graphList = ['HeliumPerHour', 'Helium', 'Clear Time', 'Void Maps', 'Loot Sources', 'Run Time'];
 var btn = document.createElement("select");
 btn.id = 'graphSelection';
-if(game.options.menu.darkTheme.enabled == 2) btn.setAttribute("style", "color: #C8C8C8");
+if (game.options.menu.darkTheme.enabled == 2) btn.setAttribute("style", "color: #C8C8C8");
 else btn.setAttribute("style", "color:black");
 btn.setAttribute("class", "settingBtn");
 btn.setAttribute("onmouseover", 'tooltip(\"Graph\", \"customText\", event, \"What graph would you like to display you nerd you?\")');
@@ -39,7 +39,7 @@ var u = document.createTextNode("Refresh");
 btn1.appendChild(u);
 btn1.setAttribute("onclick", "drawGraph()");
 btn1.setAttribute("class", "settingBtn");
-if(game.options.menu.darkTheme.enabled != 2) btn1.setAttribute("style", "color:black");
+if (game.options.menu.darkTheme.enabled != 2) btn1.setAttribute("style", "color:black");
 document.getElementById('graphParent').appendChild(btn1);
 
 //clear data button
@@ -48,7 +48,7 @@ var t = document.createTextNode("Clear All Data");
 btn2.appendChild(t);
 btn2.setAttribute("onclick", "clearData(); drawGraph();");
 btn2.setAttribute("class", "settingBtn");
-if(game.options.menu.darkTheme.enabled != 2) btn2.setAttribute("style", "color:black");
+if (game.options.menu.darkTheme.enabled != 2) btn2.setAttribute("style", "color:black");
 document.getElementById('graphParent').appendChild(btn2);
 
 var tips = document.createElement('div');
@@ -57,11 +57,10 @@ document.getElementById('graphParent').appendChild(tips);
 
 
 function clearData(portal) {
-    if(portal) {
-        while(allSaveData[0].totalPortals < game.global.totalPortals - portal) allSaveData.shift();
-    }
-    else {
-        while(allSaveData[0].totalPortals < game.global.totalPortals) allSaveData.shift();
+    if (portal) {
+        while (allSaveData[0].totalPortals < game.global.totalPortals - portal) allSaveData.shift();
+    } else {
+        while (allSaveData[0].totalPortals < game.global.totalPortals) allSaveData.shift();
     }
 }
 
@@ -86,6 +85,7 @@ function autoPlusGraphMenu() {
     toggleSettingsMenu();
 }
 var chart1;
+
 function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType) {
     chart1 = new Highcharts.Chart({
         chart: {
@@ -122,18 +122,18 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType) 
             }],
             type: yType,
             dateTimeLabelFormats: { //force all formats to be hour:minute:second
-            second: '%H:%M:%S',
-            minute: '%H:%M:%S',
-            hour: '%H:%M:%S',
-            day: '%H:%M:%S',
-            week: '%H:%M:%S',
-            month: '%H:%M:%S',
-            year: '%H:%M:%S'
-        }
+                second: '%H:%M:%S',
+                minute: '%H:%M:%S',
+                hour: '%H:%M:%S',
+                day: '%H:%M:%S',
+                week: '%H:%M:%S',
+                month: '%H:%M:%S',
+                year: '%H:%M:%S'
+            }
         },
         tooltip: {
-        	pointFormatter: formatter,
-        	valueSuffix: valueSuffix
+            pointFormatter: formatter,
+            valueSuffix: valueSuffix
         },
         legend: {
             layout: 'vertical',
@@ -181,14 +181,14 @@ function gatherInfo() {
         allSaveData = [];
     }
     //clear filtered loot data upon portaling. <5 check to hopefully throw out bone portal shenanigans
-  /*  if(allSaveData[allSaveData.length -1].totalPortals != game.global.totalPortals && game.global.world < 5) {
-    	for(var r in filteredLoot) {
-    		for(var b in filteredLoot[r]){
-    			filteredLoot[r][b] = 0;
-    		}
-    	}
-    }
-    */
+    /*  if(allSaveData[allSaveData.length -1].totalPortals != game.global.totalPortals && game.global.world < 5) {
+        for(var r in filteredLoot) {
+            for(var b in filteredLoot[r]){
+                filteredLoot[r][b] = 0;
+            }
+        }
+      }
+      */
     if (allSaveData.length === 0) {
         pushData();
     } else if (allSaveData[allSaveData.length - 1].world != game.global.world) {
@@ -202,21 +202,21 @@ function gatherInfo() {
 }
 
 function drawGraph() {
-        setGraphData(document.getElementById('graphSelection').value);
+    setGraphData(document.getElementById('graphSelection').value);
 }
 
 function setGraphData(graph) {
     var title, xTitle, yTitle, yType, valueSuffix, series, formatter;
     var oldData = JSON.stringify(graphData);
     valueSuffix = '';
-    
-    formatter =  function () {
+
+    formatter = function() {
         var ser = this.series;
         return '<span style="color:' + ser.color + '" >●</span> ' +
-                ser.name + ': <b>' + 
-                Highcharts.numberFormat(this.y, 0,'.', ',') + valueSuffix + '</b><br>';
-            };
-            
+            ser.name + ': <b>' +
+            Highcharts.numberFormat(this.y, 0, '.', ',') + valueSuffix + '</b><br>';
+    };
+
     switch (graph) {
         case 'Clear Time':
             var graphData = [];
@@ -230,18 +230,18 @@ function setGraphData(graph) {
                     })
                     currentPortal = allSaveData[i].totalPortals;
                     //push a 0 to index 0 so that clear times line up with x-axis numbers
-                    graphData[graphData.length -1].data.push(0);
+                    graphData[graphData.length - 1].data.push(0);
                 }
-                if(currentZone < allSaveData[i].world && currentZone != -1) {
-                    graphData[graphData.length - 1].data.push(Math.round((allSaveData[i].currentTime - allSaveData[i-1].currentTime) / 1000));
+                if (currentZone < allSaveData[i].world && currentZone != -1) {
+                    graphData[graphData.length - 1].data.push(Math.round((allSaveData[i].currentTime - allSaveData[i - 1].currentTime) / 1000));
                 }
-                
+
                 //first time through, push 0s to zones we don't have data for. Probably only occurs if script is loaded in the middle of a run where it was previously not loaded (haven't tested this)
                 //this functionality could fix some of the weirdness in graphs from using bone portal?
-                if(currentZone == -1) {
+                if (currentZone == -1) {
                     var loop = allSaveData[i].world - 1;
                     while (loop > 0) {
-                        graphData[graphData.length -1].data.push(0);
+                        graphData[graphData.length - 1].data.push(0);
                         loop--;
                     }
                 }
@@ -283,91 +283,91 @@ function setGraphData(graph) {
                         data: []
                     })
                     currentPortal = allSaveData[i].totalPortals;
-                    if(allSaveData[i].world == 1)
-                        graphData[graphData.length -1].data.push(0);
-                    
-                    if(currentZone == -1 || allSaveData[i].world != 1) {
+                    if (allSaveData[i].world == 1)
+                        graphData[graphData.length - 1].data.push(0);
+
+                    if (currentZone == -1 || allSaveData[i].world != 1) {
                         var loop = allSaveData[i].world;
                         while (loop > 0) {
-                            graphData[graphData.length -1].data.push(0);
+                            graphData[graphData.length - 1].data.push(0);
                             loop--;
                         }
                     }
                 }
-                if(currentZone < allSaveData[i].world && currentZone != -1) {
+                if (currentZone < allSaveData[i].world && currentZone != -1) {
                     graphData[graphData.length - 1].data.push(Math.floor(allSaveData[i].heliumOwned / ((allSaveData[i].currentTime - allSaveData[i].portalTime) / 3600000)));
                 }
-            
+
                 currentZone = allSaveData[i].world;
-                
+
             }
             title = 'Helium/Hour';
             xTitle = 'Zone';
             yTitle = 'Helium';
             yType = 'Linear';
             break;
-            
-            case 'Void Maps':
+
+        case 'Void Maps':
             var currentPortal = -1;
             var totalVoids = 0;
             var theChallenge = '';
             graphData = [];
             for (var i in allSaveData) {
                 if (allSaveData[i].totalPortals != currentPortal) {
-                    if(currentPortal == -1) {
+                    if (currentPortal == -1) {
                         theChallenge = allSaveData[i].challenge;
                         currentPortal = allSaveData[i].totalPortals;
                         graphData.push({
-                        name: 'Void Maps',
-                        data: [],
-                        type: 'column'
-                    });
+                            name: 'Void Maps',
+                            data: [],
+                            type: 'column'
+                        });
                         continue;
                     }
-                    graphData[0].data.push([allSaveData[i-1].totalPortals, totalVoids]);
+                    graphData[0].data.push([allSaveData[i - 1].totalPortals, totalVoids]);
                     theChallenge = allSaveData[i].challenge;
                     totalVoids = 0;
                     currentPortal = allSaveData[i].totalPortals;
                 }
-                if(allSaveData[i].voids > totalVoids) {
-                     totalVoids = allSaveData[i].voids;
-                 }
+                if (allSaveData[i].voids > totalVoids) {
+                    totalVoids = allSaveData[i].voids;
+                }
             }
             title = 'Void Maps Per Portal';
             xTitle = 'Portal';
             yTitle = 'Void Maps';
             yType = 'Linear';
             break;
-           /* 
-            case 'Loot Sources':
-            graphData = [];
-            graphData[0] = {name: 'Metal', data: lootData.metal};
-            graphData[1] = {name: 'Wood', data: lootData.wood};
-            graphData[2] = {name: 'Food', data: lootData.food};
-            graphData[3] = {name: 'Gems', data: lootData.gems};
-            title = 'Loot Sources';
-            xTitle = 'Time';
-            yTitle = 'Ratio Looted:Produced'
-            break;
-            */
-            
-            case 'Run Time':
+            /* 
+             case 'Loot Sources':
+             graphData = [];
+             graphData[0] = {name: 'Metal', data: lootData.metal};
+             graphData[1] = {name: 'Wood', data: lootData.wood};
+             graphData[2] = {name: 'Food', data: lootData.food};
+             graphData[3] = {name: 'Gems', data: lootData.gems};
+             title = 'Loot Sources';
+             xTitle = 'Time';
+             yTitle = 'Ratio Looted:Produced'
+             break;
+             */
+
+        case 'Run Time':
             var currentPortal = -1;
             var theChallenge = '';
             graphData = [];
             for (var i in allSaveData) {
                 if (allSaveData[i].totalPortals != currentPortal) {
-                    if(currentPortal == -1) {
+                    if (currentPortal == -1) {
                         theChallenge = allSaveData[i].challenge;
                         currentPortal = allSaveData[i].totalPortals;
                         graphData.push({
-                        name: 'Run Time',
-                        data: [],
-                        type: 'column'
-                    });
+                            name: 'Run Time',
+                            data: [],
+                            type: 'column'
+                        });
                         continue;
                     }
-                    var theOne = allSaveData[i-1];
+                    var theOne = allSaveData[i - 1];
                     var runTime = theOne.currentTime - theOne.portalTime;
                     graphData[0].data.push([theOne.totalPortals, runTime]);
                     theChallenge = allSaveData[i].challenge;
@@ -378,12 +378,12 @@ function setGraphData(graph) {
             xTitle = 'Portal';
             yTitle = 'Time';
             yType = 'datetime';
-            formatter =  function () {
+            formatter = function() {
                 var ser = this.series;
                 return '<span style="color:' + ser.color + '" >●</span> ' +
-                        ser.name + ': <b>' +
-                        Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
-            
+                    ser.name + ': <b>' +
+                    Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
+
             };
             break;
     }
@@ -427,7 +427,7 @@ function getLootData() {
         var name = loots[r];
         //avoid /0 NaN
         if(filteredLoot.produced[name])
-        	lootData[name].push(filteredLoot.looted[name]/filteredLoot.produced[name]);
+            lootData[name].push(filteredLoot.looted[name]/filteredLoot.produced[name]);
         if(lootData[name].length > 20)lootData[name].shift();
     }
 }
@@ -438,54 +438,54 @@ setInterval(getLootData, 30000);
 game.badGuys.Jestimp.loot = 
 function() {
     var elligible = ["food", "wood", "metal", "science"];
-				if (game.jobs.Dragimp.owned > 0) elligible.push("gems");
-				if (game.jobs.Explorer.locked == 0) elligible.push("fragments");
-				var roll = Math.floor(Math.random() * elligible.length);
-				var item = elligible[roll];
-				var amt = simpleSeconds(item, 45);
-				amt = scaleToCurrentMap(amt);
-				addResCheckMax(item, amt);
-				filterLoot(item, amt, true);
-				message("That Jestimp gave you " + prettify(amt) + " " + item + "!", "Loot", "*dice", "exotic");
-				game.unlocks.impCount.Jestimp++;
+                if (game.jobs.Dragimp.owned > 0) elligible.push("gems");
+                if (game.jobs.Explorer.locked == 0) elligible.push("fragments");
+                var roll = Math.floor(Math.random() * elligible.length);
+                var item = elligible[roll];
+                var amt = simpleSeconds(item, 45);
+                amt = scaleToCurrentMap(amt);
+                addResCheckMax(item, amt);
+                filterLoot(item, amt, true);
+                message("That Jestimp gave you " + prettify(amt) + " " + item + "!", "Loot", "*dice", "exotic");
+                game.unlocks.impCount.Jestimp++;
 };
 
 game.badGuys.Chronoimp.loot = 
 function () {
-				var elligible = ["food", "wood", "metal", "science"];
-				if (game.jobs.Dragimp.owned > 0) elligible.push("gems");
-				if (game.jobs.Explorer.locked == 0) elligible.push("fragments");
-				var cMessage = "That Chronoimp dropped ";
-				for (var x = 0; x < elligible.length; x++){
-					var item = elligible[x];
-					var amt = simpleSeconds(item, 5);
-					amt = scaleToCurrentMap(amt);
-					addResCheckMax(item, amt, null, null, true);
-					filterLoot(item, amt, true);
-					cMessage += prettify(amt) + " " + item;
-					if (x == (elligible.length - 1)) cMessage += "!";
-					else if (x == (elligible.length - 2)) cMessage += ", and ";
-					else cMessage += ", ";
-				}
-				message(cMessage, "Loot", "hourglass", "exotic");
-				game.unlocks.impCount.Chronoimp++;
+                var elligible = ["food", "wood", "metal", "science"];
+                if (game.jobs.Dragimp.owned > 0) elligible.push("gems");
+                if (game.jobs.Explorer.locked == 0) elligible.push("fragments");
+                var cMessage = "That Chronoimp dropped ";
+                for (var x = 0; x < elligible.length; x++){
+                    var item = elligible[x];
+                    var amt = simpleSeconds(item, 5);
+                    amt = scaleToCurrentMap(amt);
+                    addResCheckMax(item, amt, null, null, true);
+                    filterLoot(item, amt, true);
+                    cMessage += prettify(amt) + " " + item;
+                    if (x == (elligible.length - 1)) cMessage += "!";
+                    else if (x == (elligible.length - 2)) cMessage += ", and ";
+                    else cMessage += ", ";
+                }
+                message(cMessage, "Loot", "hourglass", "exotic");
+                game.unlocks.impCount.Chronoimp++;
 };
 
 function addResCheckMax(what, number, noStat, fromGather, nonFilteredLoot) {
     filterLoot(what, number, null, fromGather);
     var res = game.resources[what];
-	if (res.max == -1) {
-		res.owned += number;
-		if (!noStat && what == "gems") game.stats.gemsCollected.value += number;
-		return;
-	}
-	var newMax = res.max + (res.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
-	newMax = calcHeirloomBonus("Shield", "storageSize", newMax);
+    if (res.max == -1) {
+        res.owned += number;
+        if (!noStat && what == "gems") game.stats.gemsCollected.value += number;
+        return;
+    }
+    var newMax = res.max + (res.max * game.portal.Packrat.modifier * game.portal.Packrat.level);
+    newMax = calcHeirloomBonus("Shield", "storageSize", newMax);
     if (res.owned + number <= newMax) res.owned += number;
     else res.owned = newMax;
-	if (nonFilteredLoot && game.options.menu.useAverages.enabled){
-		addAvg(what, number);
-	}
+    if (nonFilteredLoot && game.options.menu.useAverages.enabled){
+        addAvg(what, number);
+    }
 }
 
 //END game function overwrite
@@ -500,4 +500,3 @@ if (tmpGraphData !== null) {
 
 
 setInterval(gatherInfo, 1000);
-

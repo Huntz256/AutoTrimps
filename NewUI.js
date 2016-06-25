@@ -115,7 +115,7 @@ function automationMenuInit() {
     var fightButtonCol = document.getElementById("battleBtnsColumn");
     newContainer.appendChild(abutton);
     fightButtonCol.appendChild(newContainer);
-    
+
     //create automaps status
     newContainer = document.createElement("DIV");
     newContainer.setAttribute("style", "display: block; font-size: 1.1vw; text-align: center; background-color: rgba(0,0,0,0.3);");
@@ -124,54 +124,53 @@ function automationMenuInit() {
     newContainer.appendChild(abutton);
     fightButtonCol.appendChild(newContainer);
 
-     //make timer click toggle paused mode
+    //make timer click toggle paused mode
     document.getElementById('portalTimer').setAttribute('onclick', 'toggleSetting(\'pauseGame\')');
     document.getElementById('portalTimer').setAttribute('style', 'cursor: default');
 
 
     //create container for settings buttons
     document.getElementById("settingsRow").innerHTML += '<div id="autoSettings" style="display: none;margin-bottom: 2vw;margin-top: 2vw;"></div>';
-   //shrink padding for fight buttons to help fit automaps button/status
-   	var btns = document.getElementsByClassName("fightBtn");
-		for (var x = 0; x < btns.length; x++){
-        	btns[x].style.padding = "0.01vw 0.01vw";
-		}
+    //shrink padding for fight buttons to help fit automaps button/status
+    var btns = document.getElementsByClassName("fightBtn");
+    for (var x = 0; x < btns.length; x++) {
+        btns[x].style.padding = "0.01vw 0.01vw";
+    }
 
 }
 
 
 //toggles the display of the settings menu.
-function autoToggle(what){ 
-    if(what) {
-        if(what.style.display === 'block') what.style.display = 'none';
+function autoToggle(what) {
+    if (what) {
+        if (what.style.display === 'block') what.style.display = 'none';
         else what.style.display = 'block';
-    }
-    else {
+    } else {
         if (game.options.displayed)
             toggleSettingsMenu();
         if (document.getElementById('graphParent').style.display === 'block')
             document.getElementById('graphParent').style.display = 'none';
         var item = document.getElementById('autoSettings');
-        if(item.style.display === 'block')
-            item.style.display='none';
-        else item.style.display = 'block'; 
+        if (item.style.display === 'block')
+            item.style.display = 'none';
+        else item.style.display = 'block';
     }
 }
-    //overloads the settings menu button to include hiding the auto menu settings.
-  function autoPlusSettingsMenu() {
-      var item = document.getElementById('autoSettings');
-      if(item.style.display === 'block')
-        item.style.display='none';
-      item = document.getElementById('graphParent');
-      if(item.style.display === 'block')
-        item.style.display='none';
+//overloads the settings menu button to include hiding the auto menu settings.
+function autoPlusSettingsMenu() {
+    var item = document.getElementById('autoSettings');
+    if (item.style.display === 'block')
+        item.style.display = 'none';
+    item = document.getElementById('graphParent');
+    if (item.style.display === 'block')
+        item.style.display = 'none';
     toggleSettingsMenu();
-  }
+}
 
 function createSetting(id, name, description, type, defaultValue, list, container) {
     var btnParent = document.createElement("DIV");
-   // btnParent.setAttribute('class', 'optionContainer');
-   btnParent.setAttribute('style', 'display: inline-block; vertical-align: top; margin-left: 1vw; margin-right: 1vw; margin-bottom: 1vw; width: 14.5vw;');
+    // btnParent.setAttribute('class', 'optionContainer');
+    btnParent.setAttribute('style', 'display: inline-block; vertical-align: top; margin-left: 1vw; margin-right: 1vw; margin-bottom: 1vw; width: 14.5vw;');
     var btn = document.createElement("DIV");
     btn.id = id;
     if (type == 'boolean') {
@@ -190,7 +189,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         btn.setAttribute("onmouseout", 'tooltip("hide")');
         btn.textContent = name;
         btnParent.appendChild(btn)
-        if(container) document.getElementById(container).appendChild(btnParent);
+        if (container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     } else if (type == 'value') {
         if (autoTrimpSettings[id] === undefined) {
@@ -208,7 +207,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         btn.setAttribute("onmouseout", 'tooltip("hide")');
         btn.textContent = name;
         btnParent.appendChild(btn);
-        if(container) document.getElementById(container).appendChild(btnParent);
+        if (container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     } else if (type == 'dropdown') {
         if (autoTrimpSettings[id] === undefined) {
@@ -223,7 +222,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         }
         var btn = document.createElement("select");
         btn.id = id;
-        if(game.options.menu.darkTheme.enabled == 2) btn.setAttribute("style", "color: #C8C8C8");
+        if (game.options.menu.darkTheme.enabled == 2) btn.setAttribute("style", "color: #C8C8C8");
         else btn.setAttribute("style", "color:black");
         btn.setAttribute("class", "settingsBtn");
         btn.setAttribute("onmouseover", 'tooltip(\"' + name + '\", \"customText\", event, \"' + description + '\")');
@@ -238,8 +237,8 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         }
         btn.value = autoTrimpSettings[id].selected;
         btnParent.appendChild(btn);
-        
-        if(container) document.getElementById(container).appendChild(btnParent);
+
+        if (container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     }
 }
@@ -251,7 +250,7 @@ function settingChanged(id) {
         updateCustomButtons();
     }
     if (autoTrimpSettings[id].type == 'dropdown') {
-    	autoTrimpSettings[id].selected = document.getElementById(id).value;
+        autoTrimpSettings[id].selected = document.getElementById(id).value;
     }
     updateCustomButtons();
     saveSettings();
@@ -330,26 +329,26 @@ function updateValueFields() {
         }
     }
     //automaps status
-        var status = document.getElementById('autoMapStatus');
-    if(!autoTrimpSettings.RunMapsWhenStuck.enabled) status.innerHTML = 'Off';
-   else if(needPrestige && !doVoids) status.innerHTML = 'Prestige';
-   else if(doVoids && voidCheckPercent == 0) status.innerHTML = 'Void Maps: ' + game.global.totalVoidMaps + ' remaining';
-   else if(needToVoid && !doVoids && game.global.totalVoidMaps > 0 && !stackingTox) status.innerHTML = 'Prepping for Voids';
-   else if(doVoids && voidCheckPercent > 0) status.innerHTML = 'Farming to do Voids: ' + voidCheckPercent + '%';
-   else if(shouldFarm && !doVoids) status.innerHTML = 'Farming';
-   else if(stackingTox) status.innerHTML = 'Getting Tox Stacks';
-   else if(!enoughDamage) status.innerHTML = 'Want more damage';
-   else if (!enoughHealth) status.innerHTML = 'Want more health';
-   else if (enoughHealth && enoughDamage) status.innerHTML = 'Advancing';
+    var status = document.getElementById('autoMapStatus');
+    if (!autoTrimpSettings.RunMapsWhenStuck.enabled) status.innerHTML = 'Off';
+    else if (needPrestige && !doVoids) status.innerHTML = 'Prestige';
+    else if (doVoids && voidCheckPercent == 0) status.innerHTML = 'Void Maps: ' + game.global.totalVoidMaps + ' remaining';
+    else if (needToVoid && !doVoids && game.global.totalVoidMaps > 0 && !stackingTox) status.innerHTML = 'Prepping for Voids';
+    else if (doVoids && voidCheckPercent > 0) status.innerHTML = 'Farming to do Voids: ' + voidCheckPercent + '%';
+    else if (shouldFarm && !doVoids) status.innerHTML = 'Farming';
+    else if (stackingTox) status.innerHTML = 'Getting Tox Stacks';
+    else if (!enoughDamage) status.innerHTML = 'Want more damage';
+    else if (!enoughHealth) status.innerHTML = 'Want more health';
+    else if (enoughHealth && enoughDamage) status.innerHTML = 'Advancing';
 }
 
 function updateCustomButtons() {
     //automaps button
-    
+
     if (autoTrimpSettings.RunMapsWhenStuck.enabled) document.getElementById("autoMapBtn").setAttribute("class", "btn fightBtn btn-success");
     else document.getElementById("autoMapBtn").setAttribute("class", "btn fightBtn btn-danger");
     //auto portal setting, hide until player has cleared zone 81
-    if (game.global.highestLevelCleared >= 80 ) document.getElementById("AutoPortal").style.display = '';
+    if (game.global.highestLevelCleared >= 80) document.getElementById("AutoPortal").style.display = '';
     else document.getElementById("AutoPortal").style.display = 'none';
     //custom auto portal value
     if (autoTrimpSettings.AutoPortal.selected == "Custom") document.getElementById("CustomAutoPortal").style.display = '';
@@ -357,14 +356,12 @@ function updateCustomButtons() {
     //challenge for he/hr setting
     if (autoTrimpSettings.AutoPortal.selected == "Helium Per Hour" || autoTrimpSettings.AutoPortal.selected == "Custom") document.getElementById("HeliumHourChallenge").style.display = '';
     else document.getElementById("HeliumHourChallenge").style.display = 'none';
-    
+
     //update dropdown selections
     document.getElementById('Prestige').value = autoTrimpSettings.Prestige.selected;
     document.getElementById('AutoPortal').value = autoTrimpSettings.AutoPortal.selected;
     document.getElementById('HeliumHourChallenge').value = autoTrimpSettings.HeliumHourChallenge.selected;
     document.getElementById('CustomAutoPortal').value = autoTrimpSettings.CustomAutoPortal.selected;
-    
+
 
 }
-
-
