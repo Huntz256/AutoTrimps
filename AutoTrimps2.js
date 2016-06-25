@@ -1355,6 +1355,18 @@ function autoStance() {
     }
 }
 
+var healthDamageRatio = 0;
+//returns the ratio of enemy max health to our trimp damage
+function getHealthDamageRatio() {
+    if (game.global.challengeActive == 'Lead') {
+        healthDamageRatio = getEnemyMaxHealth(game.global.world + 1) / baseDamage;
+    } else {
+        healthDamageRatio = getEnemyMaxHealth(game.global.world) / baseDamage;
+    }
+    
+    return healthDamageRatio;
+}
+
 //core function written by Belaith
 //prison/wonderland flags for use in autoPortal function
 var stackingTox = false;
@@ -1370,10 +1382,7 @@ function autoMap() {
     //if we should be farming, we will continue farming until attack/damage is under 10, if we shouldn't be farming, we will start if attack/damage rises above 15
     //add crit in somehow?
     if (!getPageSetting('DisableFarm')) {
-        if (game.global.challengeActive == 'Lead')
-            shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world + 1) / baseDamage > 10 : getEnemyMaxHealth(game.global.world + 1) / baseDamage > 15;
-        else
-            shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world) / baseDamage > 10 : getEnemyMaxHealth(game.global.world) / baseDamage > 15;
+        shouldFarm = shouldFarm ? getHealthDamageRatio() > 10 : getHealthDamageRatio() > 15;
     }
 
     needToVoid = getPageSetting('VoidMaps') > 0 && game.global.totalVoidMaps > 0 && ((game.global.world == getPageSetting('VoidMaps') && !getPageSetting('RunNewVoids')) || (game.global.world >= getPageSetting('VoidMaps') && getPageSetting('RunNewVoids'))) && (game.global.challengeActive != 'Lead' || game.global.lastClearedCell > 95);
