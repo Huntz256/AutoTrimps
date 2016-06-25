@@ -1352,17 +1352,26 @@ function autoStance() {
     }
 }
 
-var healthDamageRatio = 0;
-//returns the ratio of enemy max health to our trimp damage
-function getHealthDamageRatio() {
+//This "farmingRatio" determines whether or not to enter/leave "Farming" mode
+// and is the ratio of enemy max health to our trimp base damage. 
+//if we are currently farming, we will continue farming until this ratio < 10.
+//if we are not currently farming, we will start farming when this ratio > 15.
+var farmingRatio = 0; 
+
+//updates and returns the ratio of enemy max health to our trimp base damage
+function getFarmingRatio() {
     if (game.global.challengeActive == 'Lead') {
-        healthDamageRatio = getEnemyMaxHealth(game.global.world + 1) / baseDamage;
+        farmingRatio = getEnemyMaxHealth(game.global.world + 1) / baseDamage;
     } else {
-        healthDamageRatio = getEnemyMaxHealth(game.global.world) / baseDamage;
+        farmingRatio = getEnemyMaxHealth(game.global.world) / baseDamage;
     }
     
-    return healthDamageRatio;
+    return farmingRatio;
 }
+
+//This determines whether or not to enter "Want more damage" mode
+var enoughDamageRatio = 0; 
+
 
 //core function written by Belaith
 //prison/wonderland flags for use in autoPortal function
@@ -1376,13 +1385,13 @@ function autoMap() {
     //allow script to handle abandoning
     if (game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
 
-    //if we should be farming, we will continue farming until attack/damage is under 10, if we shouldn't be farming, we will start if attack/damage rises above 15
-    //add crit in somehow?
+    //decide whether or not to enter "Farming" mode using farmingRatio
     if (!getPageSetting('DisableFarm')) {
-        shouldFarm = shouldFarm ? getHealthDamageRatio() > 10 : getHealthDamageRatio() > 15;
+        shouldFarm = shouldFarm ? getFarmingRatio() > 10 : getFarmingRatio() > 15;
     }
 
     needToVoid = getPageSetting('VoidMaps') > 0 && game.global.totalVoidMaps > 0 && ((game.global.world == getPageSetting('VoidMaps') && !getPageSetting('RunNewVoids')) || (game.global.world >= getPageSetting('VoidMaps') && getPageSetting('RunNewVoids'))) && (game.global.challengeActive != 'Lead' || game.global.lastClearedCell > 95);
+    
     if (game.global.mapsUnlocked) {
         var enemyDamage = getEnemyMaxAttack(game.global.world + 1, 30, 'Snimp', .85);
         var enemyHealth = getEnemyMaxHealth(game.global.world + 1);
@@ -1401,7 +1410,10 @@ function autoMap() {
             doVoids = false;
 
         enoughHealth = (baseHealth * 4 > 30 * (enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : enemyDamage * 0.2) || baseHealth > 30 * (enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : enemyDamage * 0.2));
-        enoughDamage = (baseDamage * 4 > enemyHealth);
+        
+        enoughDamageRatio = (baseDamage * 4) / enemyHealth;
+        enoughDamage = (enoughDamageRatio > 1);
+
         var shouldDoMaps = !enoughHealth || !enoughDamage;
         var shouldDoMap = "world";
 

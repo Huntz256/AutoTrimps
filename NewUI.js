@@ -335,9 +335,9 @@ function updateValueFields() {
     else if (doVoids && voidCheckPercent == 0) status.innerHTML = 'Void Maps: ' + game.global.totalVoidMaps + ' remaining';
     else if (needToVoid && !doVoids && game.global.totalVoidMaps > 0 && !stackingTox) status.innerHTML = 'Prepping for Voids';
     else if (doVoids && voidCheckPercent > 0) status.innerHTML = 'Farming to do Voids: ' + voidCheckPercent + '%';
-    else if (shouldFarm && !doVoids) status.innerHTML = 'Farming: ' + healthDamageRatio.toFixed(3);
+    else if (shouldFarm && !doVoids) status.innerHTML = 'Farming: ' + farmingRatio.toFixed(3);
     else if (stackingTox) status.innerHTML = 'Getting Tox Stacks';
-    else if (!enoughDamage) status.innerHTML = 'Want more damage';
+    else if (!enoughDamage) status.innerHTML = 'Want more damage: ' + enoughDamageRatio.toFixed(3);
     else if (!enoughHealth) status.innerHTML = 'Want more health';
     else if (enoughHealth && enoughDamage) status.innerHTML = 'Advancing';
 }
