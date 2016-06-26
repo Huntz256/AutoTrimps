@@ -844,8 +844,16 @@ function getBreedTime(remaining) {
 function initializeAutoTrimps() {
     debug('initializeAutoTrimps');
     loadPageVariables();
-    javascript: with(document)(head.appendChild(createElement('script')).src = 'https://Huntz256.github.io/AutoTrimps/NewUI.js')._;
-    javascript: with(document)(head.appendChild(createElement('script')).src = 'https://Huntz256.github.io/AutoTrimps/Graphs.js')._;
+
+    var script = document.getElementById('AutoTrimps-script')
+      , base = 'https://Huntz256.github.io/AutoTrimps'
+      ;
+    if (script !== null) {
+        base = script.getAttribute('src').replace(/\/AutoTrimps2\.js$/, '');
+    }
+    document.head.appendChild(document.createElement('script')).src = base + '/NewUI.js';
+    document.head.appendChild(document.createElement('script')).src = base + '/Graphs.js';
+
     toggleSettingsMenu();
     toggleSettingsMenu();
 }
@@ -1058,7 +1066,7 @@ function autoLevelEquipment() {
         enemyHealth *= 7;
     }
     //change name to make sure these are local to the function
-    var enoughHealthE = (baseHealth * 4 > 30 * (enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : enemyDamage * 0.2) || baseHealth > 30 * (enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : enemyDamage * 0.2));
+    var enoughHealthE = !(doVoids && voidCheckPercent > 0) && (baseHealth * 4 > 30 * (enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : enemyDamage * 0.2) || baseHealth > 30 * (enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : enemyDamage * 0.2));
     var enoughDamageE = (baseDamage * 4 > enemyHealth);
 
     for (var equipName in equipmentList) {
@@ -1655,6 +1663,10 @@ function autoMap() {
                     while (difficultyAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
                         difficultyAdvMapsRange.value -= 1;
                     }
+                    //if we still cant afford the map lower the size
+                    while (sizeAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
+                        sizeAdvMapsRange.value -= 1;
+                    }
                 }
                 //if we can't afford the map we designed, pick our highest map
                 if (updateMapCost(true) > game.resources.fragments.owned) {
@@ -1752,7 +1764,8 @@ function autoPortal() {
         case "Toxicity":
         case "Watch":
         case "Lead":
-            if (!game.global.challengeActive) {
+        case "Corrupted":
+            if(!game.global.challengeActive) {
                 pushData();
                 doPortal(autoTrimpSettings.AutoPortal.selected);
             }
@@ -1793,6 +1806,9 @@ function checkSettings() {
         case "Watch":
             portalLevel = 181;
             break;
+        case "Corrupted":
+            portalLevel = 191;
+            break;        
     }
     if (portalLevel == -1)
         return;
